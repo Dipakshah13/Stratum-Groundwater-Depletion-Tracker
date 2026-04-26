@@ -1,0 +1,121 @@
+aquifer_region,year,depth_below_ground_m,critical_threshold_m
+Ganga Alluvial Plain,2008,18.35,59.0
+Ganga Alluvial Plain,2009,19.23,59.0
+Ganga Alluvial Plain,2010,20.35,59.0
+Ganga Alluvial Plain,2011,21.99,59.0
+Ganga Alluvial Plain,2012,23.07,59.0
+Ganga Alluvial Plain,2013,24.43,59.0
+Ganga Alluvial Plain,2014,25.73,59.0
+Ganga Alluvial Plain,2015,27.98,59.0
+Ganga Alluvial Plain,2016,29.22,59.0
+Ganga Alluvial Plain,2017,29.88,59.0
+Ganga Alluvial Plain,2018,31.28,59.0
+Ganga Alluvial Plain,2019,33.25,59.0
+Ganga Alluvial Plain,2020,34.58,59.0
+Ganga Alluvial Plain,2021,35.38,59.0
+Ganga Alluvial Plain,2022,36.74,59.0
+Deccan Plateau,2008,5.71,28.0
+Deccan Plateau,2009,6.64,28.0
+Deccan Plateau,2010,6.9,28.0
+Deccan Plateau,2011,7.1,28.0
+Deccan Plateau,2012,7.99,28.0
+Deccan Plateau,2013,7.97,28.0
+Deccan Plateau,2014,8.8,28.0
+Deccan Plateau,2015,9.78,28.0
+Deccan Plateau,2016,10.26,28.0
+Deccan Plateau,2017,10.09,28.0
+Deccan Plateau,2018,10.61,28.0
+Deccan Plateau,2019,11.24,28.0
+Deccan Plateau,2020,11.33,28.0
+Deccan Plateau,2021,11.89,28.0
+Deccan Plateau,2022,12.64,28.0
+Rajasthan Desert,2008,24.59,41.9
+Rajasthan Desert,2009,25.76,41.9
+Rajasthan Desert,2010,26.27,41.9
+Rajasthan Desert,2011,26.77,41.9
+Rajasthan Desert,2012,27.46,41.9
+Rajasthan Desert,2013,27.58,41.9
+Rajasthan Desert,2014,28.68,41.9
+Rajasthan Desert,2015,29.29,41.9
+Rajasthan Desert,2016,29.53,41.9
+Rajasthan Desert,2017,29.9,41.9
+Rajasthan Desert,2018,30.53,41.9
+Rajasthan Desert,2019,31.44,41.9
+Rajasthan Desert,2020,31.72,41.9
+Rajasthan Desert,2021,32.86,41.9
+Rajasthan Desert,2022,33.09,41.9
+Coastal Andhra,2008,12.81,47.4
+Coastal Andhra,2009,14.32,47.4
+Coastal Andhra,2010,15.42,47.4
+Coastal Andhra,2011,17.11,47.4
+Coastal Andhra,2012,18.09,47.4
+Coastal Andhra,2013,19.63,47.4
+Coastal Andhra,2014,21.22,47.4
+Coastal Andhra,2015,22.36,47.4
+Coastal Andhra,2016,24.05,47.4
+Coastal Andhra,2017,24.83,47.4
+Coastal Andhra,2018,25.93,47.4
+Coastal Andhra,2019,27.57,47.4
+Coastal Andhra,2020,28.89,47.4
+Coastal Andhra,2021,30.1,47.4
+Coastal Andhra,2022,31.88,47.4
+Punjab Doab,2008,16.5,47.8
+Punjab Doab,2009,16.78,47.8
+Punjab Doab,2010,18.7,47.8
+Punjab Doab,2011,19.42,47.8
+Punjab Doab,2012,20.1,47.8
+Punjab Doab,2013,21.73,47.8
+Punjab Doab,2014,22.54,47.8
+Punjab Doab,2015,23.98,47.8
+Punjab Doab,2016,25.18,47.8
+Punjab Doab,2017,25.69,47.8
+Punjab Doab,2018,27.5,47.8
+Punjab Doab,2019,28.64,47.8
+Punjab Doab,2020,28.98,47.8
+Punjab Doab,2021,30.48,47.8
+Punjab Doab,2022,31.95,47.8
+Krishna Basin,2008,22.47,54.4
+Krishna Basin,2009,23.15,54.4
+Krishna Basin,2010,23.76,54.4
+Krishna Basin,2011,24.4,54.4
+Krishna Basin,2012,25.94,54.4
+Krishna Basin,2013,26.37,54.4
+Krishna Basin,2014,26.93,54.4
+Krishna Basin,2015,28.41,54.4
+Krishna Basin,2016,29.12,54.4
+Krishna Basin,2017,29.86,54.4
+Krishna Basin,2018,30.68,54.4
+Krishna Basin,2019,31.23,54.4
+Krishna Basin,2020,32.78,54.4
+Krishna Basin,2021,33.38,54.4
+Krishna Basin,2022,33.7,54.4
+Brahmaputra Floodplain,2008,21.76,56.7
+Brahmaputra Floodplain,2009,23.21,56.7
+Brahmaputra Floodplain,2010,24.62,56.7
+Brahmaputra Floodplain,2011,25.34,56.7
+Brahmaputra Floodplain,2012,27.05,56.7
+Brahmaputra Floodplain,2013,27.74,56.7
+Brahmaputra Floodplain,2014,28.93,56.7
+Brahmaputra Floodplain,2015,29.93,56.7
+Brahmaputra Floodplain,2016,31.44,56.7
+Brahmaputra Floodplain,2017,32.41,56.7
+Brahmaputra Floodplain,2018,33.04,56.7
+Brahmaputra Floodplain,2019,34.74,56.7
+Brahmaputra Floodplain,2020,35.96,56.7
+Brahmaputra Floodplain,2021,36.38,56.7
+Brahmaputra Floodplain,2022,38.41,56.7
+Bundelkhand Hard Rock,2008,13.97,56.4
+Bundelkhand Hard Rock,2009,15.55,56.4
+Bundelkhand Hard Rock,2010,17.07,56.4
+Bundelkhand Hard Rock,2011,19.16,56.4
+Bundelkhand Hard Rock,2012,19.93,56.4
+Bundelkhand Hard Rock,2013,21.52,56.4
+Bundelkhand Hard Rock,2014,23.88,56.4
+Bundelkhand Hard Rock,2015,24.96,56.4
+Bundelkhand Hard Rock,2016,26.74,56.4
+Bundelkhand Hard Rock,2017,28.0,56.4
+Bundelkhand Hard Rock,2018,29.74,56.4
+Bundelkhand Hard Rock,2019,31.28,56.4
+Bundelkhand Hard Rock,2020,32.85,56.4
+Bundelkhand Hard Rock,2021,34.26,56.4
+Bundelkhand Hard Rock,2022,36.07,56.4

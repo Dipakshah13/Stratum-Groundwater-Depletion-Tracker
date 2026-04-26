@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Regions List{% endblock %}
+
+{% block content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+<div class="chart-card mt-0 mb-4">
+    <h3 class="card-title mb-3">Geospatial Overview</h3>
+    <div id="regionMap" style="height: 400px; width: 100%; border-radius: 12px; border: 1px solid var(--border-soft); z-index: 1;"></div>
+</div>
+
+<div class="chart-card mt-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="card-title mb-0">Current Status by Region</h3>
+        <input type="text" id="regionSearch" class="form-control" placeholder="Search regions..." style="max-width: 250px;">
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover" id="regionTable">
+            <thead>
+                <tr>
+                    <th>Region Name</th>
+                    <th>Latest Water Level (ft)</th>
+                    <th>Depletion Rate (ft/mo)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in regions %}
+                <tr>
+                    <td class="fw-medium">{{ row.region }}</td>
+                    <td>{{ row.water_level }}</td>
+                    <td>{{ row.depletion_rate }}</td>
+                    <td>
+                        <span class="status-badge {{ row.status }}">{{ row.status|capitalize }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('regionSearch').addEventListener('keyup', function() {
+    let filter = this.value.toUpperCase();
+    let rows = document.querySelector("#regionTable tbody").rows;
+    
+    for (let i = 0; i < rows.length; i++) {
+        let regionCol = rows[i].cells[0].textContent.toUpperCase();
+        if (regionCol.indexOf(filter) > -1) {
+            rows[i].style.display = "";
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+});
+</script>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script id="regions-json" type="application/json">{{ regions | tojson | safe }}</script>
+<script>
+    // Initialize map focused on USA (where our mock coords roughly sit)
+    const map = L.map('regionMap').setView([37.09, -95.71], 4);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    const regionsData = JSON.parse(document.getElementById('regions-json').textContent);
+    
+    regionsData.forEach(region => {
+        if (region.lat && region.lng) {
+            let color = '#3b82f6'; // default
+            if (region.status === 'green') color = '#10b981';
+            else if (region.status === 'yellow') color = '#f59e0b';
+            else if (region.status === 'red') color = '#ef4444';
+            
+            const circle = L.circle([region.lat, region.lng], {
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.5,
+                radius: 150000 // 150km radius for visibility
+            }).addTo(map);
+            
+            circle.bindPopup(`<b>${region.region}</b><br>Level: ${region.water_level} ft<br>Depletion: ${region.depletion_rate} ft/mo<br>Status: <span style="color:${color};font-weight:bold;">${region.status.toUpperCase()}</span>`);
+        }
+    });
+
+    // We can hook into the global checkUpdates live system if needed:
+    document.addEventListener('DataUpdated', () => {
+        // Automatically handled by our innerHTML refresh, but map instances 
+        // need to be re-drawn. In a real environment, we'd fetch new JSON and move markers.
+        // For now, refreshing the page if the map needs pure visual update is easiest 
+        // since leaflet is heavily stateful.
+    });
+</script>
+{% endblock %}

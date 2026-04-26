@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}System Alerts{% endblock %}
+
+{% block content %}
+<div class="chart-card mt-0" style="max-width: 800px; margin: 0 auto;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="card-title mb-0">Recent Notifications</h3>
+        
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                All Alerts
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">All Alerts</a></li>
+                <li><a class="dropdown-item" href="#">Critical Only</a></li>
+                <li><a class="dropdown-item" href="#">Warnings Only</a></li>
+            </ul>
+        </div>
+    </div>
+
+    {% if alerts %}
+        {% for alert in alerts %}
+        <div class="alert-item {{ alert.type }}">
+            <div class="alert-icon">
+                {% if alert.type == 'critical' %}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--status-red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {% else %}
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--status-yellow)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                {% endif %}
+            </div>
+            <div class="alert-content">
+                <p class="text-main">{{ alert.message }}</p>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {{ 'bg-danger text-light' if alert.type == 'critical' else 'bg-warning text-dark' }}">{{ alert.region }}</span>
+                    <span class="alert-date">{{ alert.date }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-5 text-muted">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-50"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <p>System is stable. No recent alerts or anomalies recorded.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// We no longer trigger sound physically inside this template because it is dynamically 
+// handled globally across any page via checkUpdates() in main.js.
+// We merely ensure active criticals get the pulsing animation here if loaded fresh.
+document.addEventListener('DOMContentLoaded', () => {
+    const alertItems = document.querySelectorAll('.alert-item.critical');
+    alertItems.forEach(alert => alert.classList.add('animate-critical'));
+});
+</script>
+{% endblock %}

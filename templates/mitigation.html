@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}Mitigation{% endblock %}
+
+{% block content %}
+
+<!-- ── ROW 1: Strategy Library Grid ─────────────────────────── -->
+<div class="chart-card mt-0 mb-4">
+  <div class="d-flex align-items-center gap-2 mb-1">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Strategy Library</span>
+  </div>
+  <h4 class="card-title mb-1 mt-1">Select an Intervention Strategy</h4>
+  <p class="text-muted mb-4" style="font-size:0.85rem;">Click any card to preview its projected impact on the depletion curve.</p>
+
+  <div class="row g-3" id="strategyGrid">
+
+    <!-- Card 1 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Drip Irrigation Mandate" data-pct="10"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:2px solid #bbf7d0;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#16a34a22;color:#16a34a;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#16a34a;">−10%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#14532d;">Drip Irrigation Mandate</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#15803d;pointer-events:none;">Reduces agricultural demand by replacing flood irrigation.</p>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Rainwater Harvesting" data-pct="8"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#eff6ff 0%,#dbeafe 100%);border:2px solid #bfdbfe;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#2563eb22;color:#2563eb;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.2A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/><polyline points="16 16 12 20 8 16"/><line x1="12" y1="12" x2="12" y2="20"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#2563eb;">−8%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#1e3a8a;">Rainwater Harvesting</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#1d4ed8;pointer-events:none;">Captures surface runoff to supplement groundwater supply.</p>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Aquifer Recharge Program" data-pct="15"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#f0fdfa 0%,#ccfbf1 100%);border:2px solid #99f6e4;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#0d948822;color:#0d9488;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#0d9488;">−15%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#134e4a;">Aquifer Recharge Program</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#0f766e;pointer-events:none;">Injects treated surface water directly into aquifer systems.</p>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Extraction Cap Enforcement" data-pct="20"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#fff7ed 0%,#ffedd5 100%);border:2px solid #fed7aa;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#ea580c22;color:#ea580c;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#ea580c;">−20%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#7c2d12;">Extraction Cap Enforcement</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#c2410c;pointer-events:none;">Legally limits daily groundwater pumping per region.</p>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Groundwater Banking" data-pct="12"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#fdf4ff 0%,#f3e8ff 100%);border:2px solid #e9d5ff;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#9333ea22;color:#9333ea;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#9333ea;">−12%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#581c87;">Groundwater Banking</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#7e22ce;pointer-events:none;">Stores surplus water underground during wet seasons.</p>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Industrial Recycling Policy" data-pct="7"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#fefce8 0%,#fef9c3 100%);border:2px solid #fde68a;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#ca8a0422;color:#ca8a04;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#ca8a04;">−7%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#713f12;">Industrial Recycling Policy</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#a16207;pointer-events:none;">Mandates water recycling in industrial sectors.</p>
+      </div>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="col-md-3 col-sm-6">
+      <div class="strategy-card s-card rounded-4 h-100 d-flex flex-column p-4"
+           data-name="Agricultural Fallow Rotation" data-pct="9"
+           onclick="selectStrategy(this)"
+           style="background:linear-gradient(135deg,#fff1f2 0%,#ffe4e6 100%);border:2px solid #fecdd3;cursor:pointer;">
+        <div class="s-icon mb-3" style="background:#e1143422;color:#e11d48;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="s-pct mb-2" style="color:#e11d48;">−9%</div>
+        <p class="fw-bold mb-1" style="font-size:0.9rem;pointer-events:none;color:#881337;">Agricultural Fallow Rotation</p>
+        <p class="mb-0 mt-auto" style="font-size:0.75rem;color:#be123c;pointer-events:none;">Rotates fields to reduce continuous groundwater demand.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ── ROW 2: Form (left) + Chart (right) ───────────────────── -->
+<div class="row g-4 mb-4">
+
+  <!-- Log Form -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm rounded-4 h-100" style="background:#fff;">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Log Intervention</span>
+        </div>
+        <h5 class="fw-bold mb-4 mt-1" style="letter-spacing:-0.01em;">Record Action Taken</h5>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing:0.07em;font-size:0.72rem;">Target Region</label>
+          <select id="logRegion" class="form-select">
+            {% for region in regions %}
+            <option value="{{ region }}">{{ region }}
+              {%- if region_risk.get(region) == 'red' %} — ⚠ Critical
+              {%- elif region_risk.get(region) == 'yellow' %} — Warning
+              {%- else %} — Stable{%- endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing:0.07em;font-size:0.72rem;">Strategy Applied</label>
+          <div class="p-2 px-3 rounded-3 d-flex justify-content-between align-items-center" id="strategyDisplay"
+               style="background:#f8fafc;border:1px solid #e2e8f0;min-height:42px;">
+            <span id="strategyDisplayText" class="text-muted" style="font-size:0.88rem;">← Select a card above</span>
+            <span id="strategyDisplayPct" class="badge d-none" style="background:#d1fae5;color:#059669;font-size:0.78rem;">0%</span>
+          </div>
+          <input type="hidden" id="logStrategy">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing:0.07em;font-size:0.72rem;">Expected Reduction</label>
+          <div class="input-group">
+            <input id="logPct" class="form-control" type="number" min="0" max="100" value="0">
+            <span class="input-group-text" style="background:#f8fafc;border-color:#e2e8f0;color:#64748b;">%</span>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing:0.07em;font-size:0.72rem;">Date</label>
+          <input id="logDate" class="form-control" type="date">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing:0.07em;font-size:0.72rem;">Notes (optional)</label>
+          <textarea id="logNotes" class="form-control" rows="2" placeholder="Additional context…"></textarea>
+        </div>
+
+        <button id="logBtn" class="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
+                style="border-radius:10px;background:var(--brand-primary);border:none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Intervention Log
+        </button>
+
+        <div id="logSuccess" class="d-none mt-3 text-center py-2 rounded-3" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+          <span style="color:#15803d;font-size:0.85rem;font-weight:600;">✓ Logged successfully</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Impact Preview Chart -->
+  <div class="col-lg-8">
+    <div class="chart-card mt-0 h-100">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+        <div>
+          <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Live Impact Preview</span>
+          <h4 class="card-title mb-0 mt-1">Projected Recovery with Active Strategy</h4>
+        </div>
+        <div class="d-flex align-items-center gap-2" style="font-size:0.75rem;">
+          <div class="px-3 py-2 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0;">
+            <span class="text-muted">Region: </span><strong id="previewRegionLabel">—</strong>
+          </div>
+          <div class="px-3 py-2 rounded-3" style="background:#d1fae5;border:1px solid #a7f3d0;">
+            <span style="color:#059669;">Mitigation: </span><strong id="previewPctLabel" style="color:#059669;">0%</strong>
+          </div>
+        </div>
+      </div>
+      <div id="chartPlaceholder" class="d-flex flex-column align-items-center justify-content-center py-5 text-muted">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" class="mb-3 opacity-25"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p style="font-size:0.85rem;">Select a strategy card above to preview the impact</p>
+      </div>
+      <canvas id="mitigationChart" height="200" class="d-none"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROW 3: Intervention History Table ────────────────────── -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+  <div class="p-3 px-4 border-bottom d-flex justify-content-between align-items-center" style="background:#fff;border-color:#e2e8f0!important;">
+    <div>
+      <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Action Records</span>
+      <h5 class="fw-bold mb-0 mt-1" style="font-size:0.95rem;letter-spacing:-0.01em;">Intervention History</h5>
+    </div>
+    <span class="badge" id="logCount" style="background:#f1f5f9;color:#64748b;font-weight:600;font-size:0.72rem;">0 records</span>
+  </div>
+  <div class="table-responsive" style="max-height:320px;overflow-y:auto;">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="sticky-top" style="top:0;z-index:2;">
+        <tr>
+          <th>Date</th><th>Region</th><th>Strategy</th>
+          <th class="text-center">Reduction</th><th>Notes</th>
+          <th class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody id="logTableBody" style="font-size:0.88rem;"></tbody>
+    </table>
+  </div>
+  <div class="px-4 py-2 border-top d-flex gap-4 flex-wrap" style="background:#f8fafc;border-color:#e2e8f0!important;font-size:0.78rem;">
+    <span class="text-muted">Total: <strong id="summaryTotal" class="text-primary">0</strong></span>
+    <span class="text-muted">Regions: <strong id="summaryRegions" class="text-primary">0</strong></span>
+    <span class="text-muted">Avg reduction: <strong id="summaryAvgPct" class="text-success">0%</strong></span>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedStrategy = null;
+let mitigationChartInstance = null;
+
+// ── Strategy Card Click ───────────────────────────────────────────
+function selectStrategy(el) {
+    const card = el.closest('.strategy-card');
+    if (!card) return;
+
+    // Reset all cards
+    document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
+
+    // Activate clicked card
+    card.classList.add('selected');
+
+    const name = card.dataset.name;
+    const pct  = card.dataset.pct;
+    selectedStrategy = { name, pct: parseInt(pct) };
+
+    // Update hidden input + display box
+    document.getElementById('logStrategy').value = name;
+    document.getElementById('logPct').value = pct;
+
+    const displayText = document.getElementById('strategyDisplayText');
+    const displayPct  = document.getElementById('strategyDisplayPct');
+    displayText.textContent = name;
+    displayText.classList.remove('text-muted');
+    displayText.style.color = '#0f172a';
+    displayText.style.fontWeight = '600';
+    displayPct.textContent = '−' + pct + '%';
+    displayPct.classList.remove('d-none');
+
+    previewImpact();
+}
+
+// ── Chart Preview ─────────────────────────────────────────────────
+function previewImpact() {
+    const region = document.getElementById('logRegion').value;
+    const pct    = parseInt(document.getElementById('logPct').value) || 0;
+
+    document.getElementById('previewRegionLabel').textContent = region;
+    document.getElementById('previewPctLabel').textContent    = pct + '%';
+
+    fetch(`/api/predict/${encodeURIComponent(region)}?months=12&mitigation=${pct}`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.historical) return;
+
+            document.getElementById('chartPlaceholder').classList.add('d-none');
+            const canvas = document.getElementById('mitigationChart');
+            canvas.classList.remove('d-none');
+
+            const allLabels = [...data.historical.labels, ...data.predicted.labels];
+            const histData  = [...data.historical.data, ...Array(data.predicted.labels.length).fill(null)];
+
+            const predData = [...Array(data.historical.labels.length - 1).fill(null)];
+            predData.push(data.historical.data[data.historical.data.length - 1]);
+            predData.push(...data.predicted.data);
+
+            const mitigatedData = [...Array(data.historical.labels.length - 1).fill(null)];
+            mitigatedData.push(data.historical.data[data.historical.data.length - 1]);
+            mitigatedData.push(...data.predicted.mitigated);
+
+            const ctx = canvas.getContext('2d');
+            if (mitigationChartInstance) mitigationChartInstance.destroy();
+
+            mitigationChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allLabels,
+                    datasets: [
+                        { label: 'Historical', data: histData,
+                          borderColor: '#94a3b8', backgroundColor: 'transparent',
+                          borderWidth: 2, tension: 0.4, pointRadius: 2 },
+                        { label: 'Baseline (No Action)', data: predData,
+                          borderColor: '#f87171', borderDash: [6, 4],
+                          backgroundColor: 'rgba(248,113,113,0.06)',
+                          borderWidth: 2.5, tension: 0.4, fill: true,
+                          pointRadius: 3, pointBackgroundColor: '#fff',
+                          pointBorderColor: '#f87171', pointBorderWidth: 2 },
+                        { label: 'With Mitigation (−' + pct + '%)', data: mitigatedData,
+                          borderColor: '#10b981',
+                          backgroundColor: 'rgba(16,185,129,0.08)',
+                          borderWidth: 2.5, tension: 0.4, fill: true,
+                          pointRadius: 3, pointBackgroundColor: '#fff',
+                          pointBorderColor: '#10b981', pointBorderWidth: 2 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, position: 'top',
+                            labels: { font: { family: 'Inter', size: 11 }, usePointStyle: true, padding: 16 } },
+                        tooltip: {
+                            mode: 'index', intersect: false,
+                            backgroundColor: 'rgba(15,23,42,0.92)',
+                            titleFont: { size: 12, family: 'Inter' },
+                            bodyFont: { size: 12, family: 'Inter' },
+                            padding: 12, boxPadding: 4,
+                            callbacks: {
+                                label: c => c.parsed.y !== null ? ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)} ft` : null
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { grid: { color: '#f1f5f9' }, border: { display: false },
+                             ticks: { color: '#94a3b8', callback: v => v + ' ft' } },
+                        x: { grid: { display: false },
+                             ticks: { color: '#94a3b8', maxTicksLimit: 8, font: { size: 10 } } }
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
+        });
+}
+
+// ── Save Log ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('logDate').value = new Date().toISOString().split('T')[0];
+    loadLogs();
+
+    document.getElementById('logRegion').addEventListener('change', () => {
+        if (selectedStrategy) previewImpact();
+    });
+
+    document.getElementById('logBtn').addEventListener('click', () => {
+        const region   = document.getElementById('logRegion').value;
+        const strategy = document.getElementById('logStrategy').value.trim();
+        const pct      = parseFloat(document.getElementById('logPct').value);
+        const date     = document.getElementById('logDate').value;
+        const notes    = document.getElementById('logNotes').value.trim();
+
+        if (!strategy) { alert('Please select a strategy card first.'); return; }
+        if (!date)     { alert('Please set a date.');                   return; }
+
+        const btn = document.getElementById('logBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving…';
+
+        fetch('/api/mitigation/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ region, strategy, reduction_pct: pct, date, notes })
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Intervention Log';
+            if (data.success) {
+                const s = document.getElementById('logSuccess');
+                s.classList.remove('d-none');
+                setTimeout(() => s.classList.add('d-none'), 3000);
+                document.getElementById('logNotes').value = '';
+                loadLogs();
+            }
+        });
+    });
+});
+
+// ── History Table ─────────────────────────────────────────────────
+function loadLogs() {
+    fetch('/api/mitigation/logs')
+        .then(r => r.json())
+        .then(logs => {
+            const tbody = document.getElementById('logTableBody');
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted" style="font-size:0.88rem;">
+                    No interventions logged yet.</td></tr>`;
+                document.getElementById('logCount').textContent = '0 records';
+                document.getElementById('summaryTotal').textContent   = '0';
+                document.getElementById('summaryRegions').textContent = '0';
+                document.getElementById('summaryAvgPct').textContent  = '0%';
+                return;
+            }
+            tbody.innerHTML = '';
+            logs.forEach(log => {
+                tbody.innerHTML += `
+                  <tr>
+                    <td style="font-family:monospace;font-size:0.8rem;color:#64748b;">${log.date}</td>
+                    <td class="fw-semibold">${log.region}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${log.strategy}">${log.strategy}</td>
+                    <td class="text-center"><span class="badge" style="background:#d1fae5;color:#059669;font-weight:700;">−${log.reduction_pct}%</span></td>
+                    <td class="text-muted" style="font-size:0.82rem;">${log.notes || '—'}</td>
+                    <td class="text-center">
+                      <button onclick="deleteLog(${log.id},this)"
+                        style="background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:4px 10px;font-size:0.78rem;font-weight:600;cursor:pointer;">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>`;
+            });
+            document.getElementById('logCount').textContent = logs.length + ' records';
+            document.getElementById('summaryTotal').textContent   = logs.length;
+            document.getElementById('summaryRegions').textContent = new Set(logs.map(l => l.region)).size;
+            document.getElementById('summaryAvgPct').textContent  =
+                (logs.reduce((s,l) => s + l.reduction_pct, 0) / logs.length).toFixed(1) + '%';
+        });
+}
+
+function deleteLog(id, btn) {
+    if (!confirm('Remove this record?')) return;
+    btn.disabled = true;
+    fetch(`/api/mitigation/log/${id}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(d => { if (d.success) loadLogs(); });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ self.title() }} · STRATUM</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS for grid & basics -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PDF Exporting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand" style="align-items:center;gap:10px;">
+            <!-- STRATUM Logo: water drop + "S" monogram on gradient badge -->
+            <span class="brand-icon" style="width:42px;height:42px;background:linear-gradient(145deg,#0f766e 0%,#0891b2 100%);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 12px rgba(15,118,110,0.45);position:relative;overflow:hidden;gap:0px;">
+                <!-- Strata texture -->
+                <div style="position:absolute;bottom:4px;left:0;right:0;padding:0 5px;display:flex;flex-direction:column;gap:2px;">
+                    <div style="height:1px;background:rgba(255,255,255,0.18);border-radius:1px;"></div>
+                    <div style="height:1px;background:rgba(255,255,255,0.3);border-radius:1px;"></div>
+                </div>
+                <!-- Water droplet SVG -->
+                <svg width="11" height="13" viewBox="0 0 11 13" fill="none" style="z-index:1;margin-bottom:-1px;">
+                    <path d="M5.5 0.5C4.2 2.5 2 5.2 2 7a3.5 3.5 0 0 0 7 0C9 5.2 6.8 2.5 5.5 0.5z" fill="rgba(255,255,255,0.95)"/>
+                </svg>
+                <!-- S monogram -->
+                <span style="color:#ffffff;font-weight:900;font-size:1rem;letter-spacing:-0.04em;font-family:'Inter',sans-serif;z-index:1;text-shadow:0 1px 3px rgba(0,0,0,0.2);line-height:1;">S</span>
+            </span>
+            <div style="line-height:1;">
+                <div style="font-size:1rem;font-weight:800;letter-spacing:0.12em;color:var(--text-primary);font-family:'Inter',sans-serif;">STRATUM</div>
+                <div style="font-size:0.6rem;letter-spacing:0.15em;color:var(--text-tertiary);text-transform:uppercase;margin-top:2px;">Aquifer Intelligence</div>
+            </div>
+        </div>
+        
+        <p class="sidebar-label mt-2">Main Menu</p>
+        <ul class="sidebar-nav">
+            <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                Dashboard
+            </a></li>
+            <li><a href="{{ url_for('regions') }}" class="{% if request.endpoint == 'regions' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Regions
+            </a></li>
+            <li><a href="{{ url_for('analysis') }}" class="{% if request.endpoint == 'analysis' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Analysis
+            </a></li>
+            <li><a href="{{ url_for('prediction') }}" class="{% if request.endpoint == 'prediction' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Prediction
+            </a></li>
+            <li><a href="{{ url_for('alerts') }}" class="{% if request.endpoint == 'alerts' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Alerts
+            </a></li>
+            <li><a href="{{ url_for('mitigation') }}" class="{% if request.endpoint == 'mitigation' %}active{% endif %}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Mitigation
+            </a></li>
+        </ul>
+    </aside>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-2">
+                <button id="mobileMenuBtn" class="btn btn-light d-md-none p-2 border-0 bg-transparent shadow-none" style="color:var(--text-primary);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <h1 class="topbar-title m-0">{% block title %}Dashboard{% endblock %}</h1>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button onclick="exportDashboardToPDF()" class="btn btn-outline-danger btn-sm d-flex align-items-center gap-2 shadow-sm" style="border-radius: 6px; padding: 6px 14px; font-weight: 600;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10l6 6v3"/><path d="M19 15v6"/><path d="M22 18l-3 3-3-3"/><path d="M14 2v6h6"/></svg>
+                    Export Report
+                </button>
+                <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#uploadModal" style="border-radius: 6px; padding: 6px 14px; font-weight: 600; color: var(--brand-primary); border-color: var(--border-soft); background: #fff; box-shadow: var(--shadow-sm);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Upload Data
+                </button>
+                <div class="user-profile dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor:pointer;">
+                    <div class="d-flex flex-column align-items-end me-1 d-none d-md-block">
+                        <span class="text-primary fw-semibold d-block" style="font-size: 0.85rem; line-height: 1;">{{ current_user.name }}</span>
+                        <span class="text-tertiary" style="font-size: 0.7rem;">{{ current_user.role }}</span>
+                    </div>
+                    <div class="user-avatar text-uppercase">{{ current_user.name[0] }}</div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" class="ms-1"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
+                    <li><a class="dropdown-item py-2 text-danger" style="font-size: 0.9rem; font-weight: 500;" href="{{ url_for('logout') }}">Logout</a></li>
+                </ul>
+            </div>
+        </header>
+
+        <main class="content-area">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="alert alert-dismissible fade show mb-4 shadow-sm" role="alert" style="border-radius: var(--radius-md); border: 1px solid #14b8a6; background-color: #f0fdfa; color: #0f766e; display: flex; align-items: center; justify-content: space-between;">
+                    <div><strong class="fw-semibold me-2">System Notice:</strong> {{ message }}</div>
+                    <button type="button" class="btn-close m-0 p-0 position-relative" data-bs-dismiss="alert" aria-label="Close" style="width: auto; height: auto; background: none; opacity: 1;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--radius-lg);">
+          <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+            <h5 class="modal-title fw-bold" style="letter-spacing: -0.01em;">Upload Dataset</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+            <div class="modal-body p-4">
+
+              <!-- Any-format notice -->
+              <div class="d-flex align-items-start gap-2 mb-4 p-3 rounded-3" style="background:#f0fdfa;border:1px solid #99f6e4;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" class="flex-shrink-0 mt-1"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <div>
+                  <p class="fw-semibold mb-1" style="font-size:0.85rem;color:#0f766e;">Any CSV format accepted</p>
+                  <p class="mb-0 text-muted" style="font-size:0.78rem;">STRATUM auto-detects your column names and maps them intelligently. Missing fields (status, depletion rate) are computed automatically from your data.</p>
+                </div>
+              </div>
+
+              <div class="upload-zone text-center p-4" style="border: 2px dashed var(--border-soft); border-radius: var(--radius-md); background: #f8fafc; cursor: pointer;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.5" class="mb-3 opacity-75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p class="mb-1 fw-semibold" style="color: var(--text-primary);">Browse or drag your CSV here</p>
+                <p class="small text-muted mb-3">Any column names — STRATUM figures out the rest</p>
+                <input class="form-control form-control-sm mx-auto shadow-sm" type="file" id="datafile" name="datafile" accept=".csv" required style="max-width: 260px;">
+              </div>
+
+              <!-- Smart detection hints -->
+              <div class="mt-3 px-1">
+                <p class="text-muted mb-2" style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Auto-detected fields</p>
+                <div class="d-flex flex-wrap gap-2">
+                  {% for label, hint in [('Date','date / time / timestamp / period'),('Region','region / area / location / zone / site'),('Water Level','water_level / wl / depth / head / elevation'),('Depletion Rate','rate / change / decline — or computed from levels'),('Status','status / condition / risk — or derived from percentiles')] %}
+                  <div class="rounded-3 px-2 py-1" style="background:#f1f5f9;border:1px solid #e2e8f0;">
+                    <span style="font-size:0.72rem;font-weight:700;color:#0f172a;">{{ label }}</span>
+                    <span class="text-muted ms-1" style="font-size:0.68rem;">{{ hint }}</span>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+            </div>
+            <div class="modal-footer border-top-0 pt-0 pb-4 px-4">
+              <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="background:#f1f5f9;border-color:#f1f5f9;color:var(--text-secondary);">Cancel</button>
+              <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import & Sync
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Bootstrap JS bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        async function exportDashboardToPDF() {
+            const btn = document.querySelector('[onclick="exportDashboardToPDF()"]');
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Generating…';
+
+            // ── Step 1: freeze Chart.js canvases as static <img> ──────────
+            const canvases = document.querySelectorAll('canvas');
+            const swapped  = [];
+            canvases.forEach(canvas => {
+                try {
+                    const img      = document.createElement('img');
+                    img.src        = canvas.toDataURL('image/png', 1.0);
+                    img.style.cssText = `display:block;max-width:100%;width:${canvas.offsetWidth}px;height:${canvas.offsetHeight}px;`;
+                    canvas.parentNode.insertBefore(img, canvas);
+                    canvas.style.display = 'none';
+                    swapped.push({ canvas, img });
+                } catch (e) { /* cross-origin — skip */ }
+            });
+
+            // ── Step 2: hide interactive / form elements ──────────────────
+            const PDF_HIDE_SEL = [
+                // Generic controls
+                'input[type="range"]', '.form-select', '.form-range',
+                '.form-control', '.input-group', 'textarea',
+                'input[type="date"]', 'input[type="number"]',
+                '.live-indicator', '#gridSearch', '#regionSearch',
+                '.modal', '[data-bs-toggle="modal"]',
+                // Prediction panel controls
+                '#runPredictBtn', '#policySlider', '#monthSlider',
+                '#monthOutLabel', '#mitigationOutLabel', '#policyLabel',
+                // Mitigation form controls
+                '#logBtn', '#logSuccess', '#logNotes', '#logDate', '#logPct',
+                // All form labels (orphaned text after hiding inputs)
+                'label', '.form-label'
+            ].join(',');
+            const hiddenEls = [];
+
+            // Hide the entire left-column interactive panels on prediction & mitigation
+            // so the chart column expands to full width
+            const leftPanelSel = [
+                '.col-lg-4:has(#runPredictBtn)',
+                '.col-lg-4:has(#monthSlider)',
+                '.col-lg-4:has(#logRegion)',
+                '.col-lg-4:has(#logBtn)'
+            ];
+            leftPanelSel.forEach(sel => {
+                try {
+                    document.querySelectorAll(sel).forEach(el => {
+                        if (getComputedStyle(el).display !== 'none') {
+                            el.dataset.pdfHidden = '1';
+                            el.style.display = 'none';
+                            hiddenEls.push(el);
+                        }
+                    });
+                } catch(e) {/* :has() not supported in old browsers — skip */}
+            });
+
+            // Expand matching col-lg-8 chart columns to full width
+            [
+                '.col-lg-8.d-flex.flex-column',
+                '.col-lg-8:has(#predictChart)',
+                '.col-lg-8:has(#mitigationChart)'
+            ].forEach(sel => {
+                try {
+                    document.querySelectorAll(sel).forEach(el => {
+                        el.dataset.pdfOrigClass = el.style.cssText;
+                        el.style.cssText = 'width:100%!important;max-width:100%!important;flex:0 0 100%!important;';
+                        hiddenEls.push(el); // reuse restore loop for cssText reset
+                    });
+                } catch(e) {}
+            });
+
+            document.querySelectorAll(PDF_HIDE_SEL).forEach(el => {
+                if (getComputedStyle(el).display !== 'none') {
+                    el.dataset.pdfHidden = '1';
+                    el.style.display = 'none';
+                    hiddenEls.push(el);
+                }
+            });
+
+
+            const element = document.querySelector('.content-area');
+
+            // ── Prediction page: inject a "Region" info banner for the PDF ──
+            let pdfRegionBanner = null;
+            const regionSelect = document.getElementById('regionSelect');
+            if (regionSelect) {
+                const regionName = regionSelect.options[regionSelect.selectedIndex]?.text || regionSelect.value;
+                pdfRegionBanner = document.createElement('div');
+                pdfRegionBanner.style.cssText = [
+                    'display:flex', 'align-items:center', 'gap:10px',
+                    'padding:10px 18px', 'margin-bottom:16px',
+                    'background:#f0fdfa', 'border:1px solid #99f6e4',
+                    'border-radius:10px', 'font-family:Inter,sans-serif'
+                ].join(';');
+                pdfRegionBanner.innerHTML =
+                    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.5">` +
+                    `<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>` +
+                    `<span style="font-size:0.82rem;font-weight:600;color:#0f766e;letter-spacing:0.04em;text-transform:uppercase;">Region</span>` +
+                    `<span style="font-size:0.95rem;font-weight:700;color:#0f172a;">${regionName}</span>`;
+                element.insertBefore(pdfRegionBanner, element.firstChild);
+            }
+
+            const restore = () => {
+                swapped.forEach(({ canvas, img }) => {
+                    canvas.style.display = '';
+                    if (img.parentNode) img.parentNode.removeChild(img);
+                });
+                hiddenEls.forEach(el => {
+                    // Restore expanded chart columns
+                    if (el.dataset.pdfOrigClass !== undefined) {
+                        el.style.cssText = el.dataset.pdfOrigClass;
+                        delete el.dataset.pdfOrigClass;
+                    } else {
+                        el.style.display = '';
+                    }
+                    delete el.dataset.pdfHidden;
+                });
+                // Remove the temporary region banner
+                if (pdfRegionBanner && pdfRegionBanner.parentNode) {
+                    pdfRegionBanner.parentNode.removeChild(pdfRegionBanner);
+                }
+                btn.disabled  = false;
+                btn.innerHTML = original;
+            };
+
+
+
+            // ── Step 3: export ────────────────────────────────────────────
+            if (typeof html2pdf === 'undefined') {
+                restore();
+                window.print();
+                return;
+            }
+
+            try {
+                const opt = {
+                    margin:      [0.3, 0.3, 0.3, 0.3],
+                    filename:    'STRATUM-Aquifer-Report.pdf',
+                    image:       { type: 'jpeg', quality: 0.95 },
+                    html2canvas: {
+                        scale:                  1.8,
+                        useCORS:                true,
+                        allowTaint:             true,
+                        logging:                false,
+                        scrollX:                0,
+                        scrollY:                -window.scrollY,
+                        windowWidth:            document.documentElement.scrollWidth,
+                        foreignObjectRendering: false
+                    },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+                };
+                await html2pdf().set(opt).from(element).save();
+            } catch (err) {
+                console.error('PDF generation failed:', err);
+                window.print();
+            } finally {
+                restore();
+            }
+        }
+
+    </script>
+    <script>
+        // Mobile Sidebar Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.createElement('div');
+            
+            overlay.className = 'sidebar-overlay';
+            document.body.appendChild(overlay);
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+
+            if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

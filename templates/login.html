@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STRATUM · Access Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --brand: #0f766e;
+      --brand2: #0891b2;
+      --brand-light: #ccfbf1;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --red: #dc2626
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow: hidden
+    }
+
+    /* LEFT PANEL */
+    .left {
+      width: 52%;
+      background: linear-gradient(145deg, #0a4f49 0%, #0f766e 40%, #0891b2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 52px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Animated blobs */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.15;
+      animation: drift 9s ease-in-out infinite alternate
+    }
+
+    .b1 {
+      width: 380px;
+      height: 380px;
+      background: #fff;
+      top: -80px;
+      right: -60px;
+      animation-delay: 0s
+    }
+
+    .b2 {
+      width: 280px;
+      height: 280px;
+      background: #99f6e4;
+      bottom: -40px;
+      left: -40px;
+      animation-delay: 3s
+    }
+
+    .b3 {
+      width: 200px;
+      height: 200px;
+      background: #bae6fd;
+      top: 45%;
+      left: 30%;
+      animation-delay: 6s
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate(0, 0) scale(1)
+      }
+
+      to {
+        transform: translate(24px, 18px) scale(1.06)
+      }
+    }
+
+    /* Strata lines */
+    .strata {
+      position: absolute;
+      left: 0;
+      right: 0;
+      overflow: hidden
+    }
+
+    .strata-line {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 28px;
+      transform-origin: left;
+      animation: expandLine 1.4s ease both
+    }
+
+    @keyframes expandLine {
+      from {
+        transform: scaleX(0)
+      }
+
+      to {
+        transform: scaleX(1)
+      }
+    }
+
+    .left-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2
+    }
+
+    .l-icon {
+      width: 46px;
+      height: 46px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px
+    }
+
+    .l-brand-text .name {
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      color: #fff
+    }
+
+    .l-brand-text .sub {
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      color: rgba(255, 255, 255, 0.55);
+      text-transform: uppercase;
+      margin-top: 2px
+    }
+
+    .left-hero {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 40px 0
+    }
+
+    .left-hero h1 {
+      font-size: 2.6rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px
+    }
+
+    .left-hero h1 span {
+      background: linear-gradient(90deg, #99f6e4, #bae6fd);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .left-hero p {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.7;
+      max-width: 340px;
+      margin-bottom: 40px
+    }
+
+    /* Feature pills */
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px
+    }
+
+    .feat {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      animation: slideIn 0.5s ease both
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .strata-line {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin-bottom: 28px;
+      transform-origin: left;
+      animation: expandLine 1.4s ease both
+    }
+
+    @keyframes expandLine {
+      from {
+        transform: scaleX(0)
+      }
+
+      to {
+        transform: scaleX(1)
+      }
+    }
+
+    .feat-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .feat-text strong {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .feat-text span {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.55)
+    }
+
+    .left-footer {
+      position: relative;
+      z-index: 2;
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.35);
+      letter-spacing: 0.04em
+    }
+
+    /* RIGHT PANEL */
+    .right {
+      flex: 1;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      overflow-y: auto
+    }
+
+    .form-box {
+      width: 100%;
+      max-width: 400px;
+      animation: fadeUp 0.5s 0.1s ease both
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    .form-heading {
+      margin-bottom: 28px
+    }
+
+    .form-heading h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      margin-bottom: 6px
+    }
+
+    .form-heading p {
+      font-size: 0.85rem;
+      color: var(--muted)
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 28px;
+      gap: 4px
+    }
+
+    .tab {
+      flex: 1;
+      padding: 8px 0;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif
+    }
+
+    .tab.active {
+      background: #fff;
+      color: var(--brand);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1)
+    }
+
+    /* Panels */
+    .panel {
+      display: none;
+      animation: panelIn 0.22s ease both
+    }
+
+    .panel.active {
+      display: block
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    /* Google btn */
+    .btn-google {
+      width: 100%;
+      padding: 11px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      margin-bottom: 18px
+    }
+
+    .btn-google:hover {
+      border-color: #94a3b8;
+      background: #f8fafc;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06)
+    }
+
+    .g-logo {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px
+    }
+
+    .divider span {
+      font-size: 0.72rem;
+      color: var(--muted);
+      white-space: nowrap
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    /* Form fields */
+    .field {
+      margin-bottom: 15px
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 6px
+    }
+
+    .field input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #f8fafc;
+      outline: none;
+      transition: all 0.2s
+    }
+
+    .field input:focus {
+      border-color: var(--brand);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.09)
+    }
+
+    .pw-wrap {
+      position: relative
+    }
+
+    .pw-wrap input {
+      padding-right: 42px
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0;
+      line-height: 0
+    }
+
+    .row2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px
+    }
+
+    .row2 label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      cursor: pointer
+    }
+
+    .row2 input[type=checkbox] {
+      accent-color: var(--brand)
+    }
+
+    .flink {
+      font-size: 0.8rem;
+      color: var(--brand);
+      font-weight: 600;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif
+    }
+
+    .flink:hover {
+      text-decoration: underline
+    }
+
+    /* Buttons */
+    .btn-main {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0f766e, #0891b2);
+      color: #fff;
+      font-size: 0.93rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28);
+      margin-top: 2px
+    }
+
+    .btn-main:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(15, 118, 110, 0.38)
+    }
+
+    .btn-main:active {
+      transform: translateY(0)
+    }
+
+    .btn-back {
+      width: 100%;
+      padding: 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      margin-top: 10px;
+      text-decoration: none;
+      display: block;
+      text-align: center
+    }
+
+    .btn-back:hover {
+      border-color: #94a3b8;
+      color: var(--text)
+    }
+
+    /* Guest card */
+    .guest-card {
+      background: linear-gradient(135deg, #f0fdfa, #e0f2fe);
+      border: 1.5px solid #99f6e4;
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 18px;
+      text-align: center
+    }
+
+    .guest-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px
+    }
+
+    .guest-card p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 0
+    }
+
+    .guest-perks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin: 12px 0
+    }
+
+    .perk {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      background: #fff;
+      border: 1px solid #99f6e4;
+      border-radius: 20px;
+      color: var(--brand);
+      font-weight: 600
+    }
+
+    .btn-guest-main {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0f766e, #0891b2);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 14px rgba(15, 118, 110, 0.28);
+      display: block;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 10px
+    }
+
+    .btn-guest-main:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(15, 118, 110, 0.38);
+      color: #fff
+    }
+
+    /* Flash */
+    .flash {
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .flash.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--red)
+    }
+
+    .flash.success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #15803d
+    }
+
+    .flash.info {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: var(--brand)
+    }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      .left {
+        display: none
+      }
+
+      .right {
+        padding: 32px 20px
+      }
+
+      body {
+        display: block
+      }
+
+      .right {
+        min-height: 100vh
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LEFT BRAND PANEL -->
+  <div class="left">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+    <div class="strata" style="top:35%">
+      {% for i in range(8) %}<div class="strata-line"></div>{% endfor %}
+    </div>
+
+    <div class="left-brand">
+      <div class="l-icon">
+        <svg width="11" height="13" viewBox="0 0 11 13" fill="none">
+          <path d="M5.5 0.5C4.2 2.5 2 5.2 2 7a3.5 3.5 0 0 0 7 0C9 5.2 6.8 2.5 5.5 0.5z" fill="rgba(255,255,255,0.95)" />
+        </svg>
+        <span style="color:#fff;font-weight:900;font-size:0.9rem;letter-spacing:-0.04em;line-height:1">S</span>
+      </div>
+      <div class="l-brand-text">
+        <div class="name">STRATUM</div>
+        <div class="sub">Aquifer Intelligence Terminal</div>
+      </div>
+    </div>
+
+    <div class="left-hero">
+      <h1>Monitor.<br><span>Predict.</span><br>Protect.</h1>
+      <p>Real-time groundwater intelligence for hydrologists, researchers, and water resource managers.</p>
+      <div class="features">
+        <div class="feat" style="animation-delay:0.1s">
+          <div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(255,255,255,0.9)" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg></div>
+          <div class="feat-text"><strong>AI Predictive Modeling</strong><span>Polynomial regression forecasting up to 5
+              years</span></div>
+        </div>
+        <div class="feat" style="animation-delay:0.2s">
+          <div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(255,255,255,0.9)" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg></div>
+          <div class="feat-text"><strong>Geospatial Mapping</strong><span>Live region-level depletion heatmaps</span>
+          </div>
+        </div>
+        <div class="feat" style="animation-delay:0.3s">
+          <div class="feat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="rgba(255,255,255,0.9)" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg></div>
+          <div class="feat-text"><strong>Critical Alerts</strong><span>Real-time alarm system with audio
+              notifications</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">© 2026 STRATUM · Aquifer Intelligence · All rights reserved</div>
+  </div>
+
+  <!-- RIGHT FORM PANEL -->
+  <div class="right">
+    <div class="form-box">
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat, msg in messages %}
+      <div class="flash {{cat}}">
+        {% if cat=='error' %}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>{% endif %}
+        {{msg}}
+      </div>
+      {% endfor %}{% endif %}
+      {% endwith %}
+
+      <div class="form-heading">
+        <h2 id="panelTitle">Welcome back</h2>
+        <p id="panelSub">Sign in to your STRATUM account to continue.</p>
+      </div>
+
+      <div class="tabs" id="tabBar">
+        <button class="tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="tab" onclick="switchTab('register')">Register</button>
+        <button class="tab" onclick="switchTab('guest')">Guest</button>
+      </div>
+
+      <!-- ── SIGN IN ── -->
+      <div class="panel active" id="panel-login">
+        <a href="/login/google" class="btn-google">
+          <svg class="g-logo" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+              fill="#4285F4" />
+            <path
+              d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
+              fill="#34A853" />
+            <path
+              d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"
+              fill="#FBBC05" />
+            <path
+              d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"
+              fill="#EA4335" />
+          </svg>
+          Continue with Google
+        </a>
+        <div class="divider"><span>or sign in with email</span></div>
+        <form method="POST" action="/login">
+          <input type="hidden" name="action" value="login">
+          <div class="field"><label>Email address</label><input type="email" name="email" placeholder="you@example.com"
+              required autocomplete="email"></div>
+          <div class="field"><label>Password</label>
+            <div class="pw-wrap">
+              <input type="password" name="password" id="pw1" placeholder="••••••••" required
+                autocomplete="current-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('pw1',this)" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="row2">
+            <label><input type="checkbox" name="remember"> Remember me</label>
+            <button type="button" class="flink" onclick="switchTab('register')">Create account</button>
+          </div>
+          <button type="submit" class="btn-main">Sign In →</button>
+        </form>
+      </div>
+
+      <!-- ── REGISTER ── -->
+      <div class="panel" id="panel-register">
+        <a href="/login/google" class="btn-google">
+          <svg class="g-logo" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+              fill="#4285F4" />
+            <path
+              d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
+              fill="#34A853" />
+            <path
+              d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"
+              fill="#FBBC05" />
+            <path
+              d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"
+              fill="#EA4335" />
+          </svg>
+          Sign up with Google
+        </a>
+        <div class="divider"><span>or register with email</span></div>
+        <form method="POST" action="/login">
+          <input type="hidden" name="action" value="register">
+          <div class="field"><label>Full Name</label><input type="text" name="name" placeholder="Dr. Jane Smith"
+              required autocomplete="name"></div>
+          <div class="field"><label>Email address</label><input type="email" name="email" placeholder="you@example.com"
+              required autocomplete="email"></div>
+          <div class="field"><label>Password</label>
+            <div class="pw-wrap">
+              <input type="password" name="password" id="pw2" placeholder="Min. 8 characters" required
+                autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('pw2',this)" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="field"><label>Confirm Password</label>
+            <div class="pw-wrap">
+              <input type="password" name="confirm_password" id="pw3" placeholder="••••••••" required
+                autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('pw3',this)" tabindex="-1">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn-main">Create Account →</button>
+        </form>
+        <a href="#" class="btn-back" onclick="switchTab('login');return false">← Back to Sign In</a>
+      </div>
+
+      <!-- ── GUEST ── -->
+      <div class="panel" id="panel-guest">
+        <div class="guest-card">
+          <h4>🌊 Guest Access</h4>
+          <div class="guest-perks">
+            <span class="perk">✓ All Dashboards</span>
+            <span class="perk">✓ Live Charts</span>
+            <span class="perk">✓ Predictions</span>
+            <span class="perk">✓ Mitigation Maps</span>
+          </div>
+          <p>Browse with full read access. No account required. Your session ends when you close the browser.</p>
+        </div>
+        <a href="/login/guest" class="btn-guest-main">Enter as Guest →</a>
+        <a href="#" class="btn-back" onclick="switchTab('login');return false">← Sign in instead</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const HEADINGS = {
+      login: { h: 'Welcome back', p: 'Sign in to your STRATUM account to continue.' },
+      register: { h: 'Create account', p: 'Join STRATUM — free for researchers & hydrologists.' },
+      guest: { h: 'Guest access', p: 'Explore all dashboards without creating an account.' }
+    };
+    const urlTab = new URLSearchParams(location.search).get('tab');
+    if (urlTab) switchTab(urlTab);
+
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('active', ['login', 'register', 'guest'][i] === name));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      const panel = document.getElementById('panel-' + name);
+      if (panel) { panel.classList.add('active'); panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = ''; }
+      const h = HEADINGS[name];
+      document.getElementById('panelTitle').textContent = h.h;
+      document.getElementById('panelSub').textContent = h.p;
+    }
+
+    function togglePw(id, btn) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.style.opacity = inp.type === 'text' ? '1' : '0.5';
+    }
+
+    // Stagger strata line animation delays
+    document.querySelectorAll('.strata-line').forEach((el, i) => {
+      el.style.animationDelay = (i * 0.12) + 's';
+    });
+  </script>
+</body>
+
+</html>

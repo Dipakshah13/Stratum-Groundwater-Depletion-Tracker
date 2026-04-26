@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Overview Dashboard{% endblock %}
+
+{% block content %}
+
+
+{% if not has_data %}
+<!-- ── EMPTY STATE ONBOARDING ─────────────────────────────── -->
+<div class="d-flex flex-column align-items-center justify-content-center py-5 text-center" style="min-height:70vh;">
+  <div style="width:72px;height:72px;background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;box-shadow:0 8px 24px rgba(20,184,166,0.15);">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+  </div>
+
+  <h2 class="fw-black mb-2" style="letter-spacing:-0.03em;">No Data Connected</h2>
+  <p class="text-muted mb-4" style="max-width:440px;font-size:0.95rem;line-height:1.7;">
+    STRATUM is ready. Upload your groundwater CSV dataset to activate all dashboards, predictions, and analysis tools.
+  </p>
+
+  <!-- Upload CTA -->
+  <button class="btn btn-primary btn-lg d-flex align-items-center gap-2 mb-4 shadow"
+          data-bs-toggle="modal" data-bs-target="#uploadModal"
+          style="border-radius:12px;background:var(--brand-primary);border:none;padding:14px 28px;font-weight:700;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Upload Your Dataset
+  </button>
+
+  <!-- Schema guide card -->
+  <div class="rounded-4 p-4 text-start" style="background:#f8fafc;border:1px solid #e2e8f0;max-width:520px;width:100%;">
+    <p class="fw-bold mb-2" style="font-size:0.85rem;color:#0f172a;">📋 Required CSV Schema</p>
+    <p class="text-muted mb-3" style="font-size:0.8rem;">Your CSV file must include these exact column names:</p>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      {% for col, desc in [('date','YYYY-MM-DD format'),('region','Name of the region'),('water_level','Depth in feet'),('depletion_rate','ft per month'),('status','green / yellow / red')] %}
+      <div class="rounded-3 px-3 py-2" style="background:#fff;border:1px solid #e2e8f0;">
+        <code style="color:var(--brand-primary);font-size:0.8rem;font-weight:700;">{{ col }}</code>
+        <span class="text-muted ms-1" style="font-size:0.72rem;">{{ desc }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="text-muted mb-0" style="font-size:0.75rem;">
+      Example row: <code style="background:#e2e8f0;padding:2px 6px;border-radius:4px;">2024-01-15, North Region, 142.5, 2.3, yellow</code>
+    </p>
+  </div>
+</div>
+
+{% else %}
+<!-- ── NORMAL DASHBOARD ────────────────────────────────────── -->
+
+    <div class="row g-4 mb-4">
+        <!-- KPI Cards -->
+        <div class="col-md-4">
+            <div class="kpi-card">
+                <span class="kpi-label">Average Water Level</span>
+                <span class="kpi-value">{{ avg_water_level }} ft</span>
+                <div class="kpi-trend positive">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    <span>Stable Levels</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="kpi-card">
+                <span class="kpi-label">Avg Depletion Rate</span>
+                <span class="kpi-value">{{ avg_depletion }} ft/mo</span>
+                <div class="kpi-trend negative">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                    <span>+0.2 ft/mo vs last month</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="kpi-card">
+                <span class="kpi-label">Monitored Regions</span>
+                <span class="kpi-value">{{ num_regions }}</span>
+                <div class="kpi-trend text-secondary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>All sensors active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-card">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="card-title mb-0">System-Wide Groundwater Trajectory</h3>
+                    <button class="btn btn-sm btn-outline-secondary">Export Data</button>
+                </div>
+                <canvas id="historicalChart" height="90"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+let dashboardChartInstance = null;
+
+window.refreshCharts = function() {
+    const canvas = document.getElementById('historicalChart');
+    if (!canvas) return; // empty-state: no canvas yet
+    fetch('/api/historical')
+        .then(res => res.json())
+        .then(data => {
+            if (!data.labels || !data.labels.length) return;
+            const ctx = canvas.getContext('2d');
+
+            if (dashboardChartInstance) {
+                dashboardChartInstance.data.labels = data.labels;
+                dashboardChartInstance.data.datasets[0].data = data.data;
+                dashboardChartInstance.update();
+                return;
+            }
+            
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(15, 118, 110, 0.25)');
+            gradient.addColorStop(1, 'rgba(15, 118, 110, 0.0)');
+            
+            dashboardChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Avg Water Level (ft)',
+                        data: data.data,
+                        borderColor: '#0f766e',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#0f766e',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 13, family: 'Inter' },
+                            bodyFont: { size: 14, family: 'Inter', weight: 'bold' },
+                            padding: 12,
+                            boxPadding: 4,
+                            usePointStyle: true
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            display: true, 
+                            grid: { display: false },
+                            ticks: { font: { family: 'Inter' }, color: '#64748b' }
+                        },
+                        y: { 
+                            display: true, 
+                            border: { dash: [4, 4], display: false }, 
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: 'Inter' }, color: '#64748b' }
+                        }
+                    },
+                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                }
+            });
+        });
+};
+
+        document.addEventListener('DOMContentLoaded', window.refreshCharts);
+</script>
+{% endblock %}

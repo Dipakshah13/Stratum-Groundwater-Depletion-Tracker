@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis{% endblock %}
+
+{% block content %}
+
+<!-- ── Command Center KPI Gauges ──────────────────────────── -->
+<div class="row g-3 mb-4" id="statsContainer">
+  <!-- Populated by JS -->
+</div>
+
+<!-- ── Geographic Depletion Heatmap ──────────────────────── -->
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="chart-card mt-0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Intensity Matrix</span>
+          <h4 class="card-title mb-0 mt-1">Geographic Depletion Heatmap</h4>
+        </div>
+        <div class="d-flex align-items-center gap-2 small text-muted">
+          <div style="width:100px;height:10px;background:linear-gradient(to right,#ef4444,#f59e0b,#10b981);border-radius:100px;"></div>
+          <span style="font-size:0.72rem;">Critical → Stable</span>
+        </div>
+      </div>
+
+      <!-- Region row labels + heatmap grid -->
+      <div class="d-flex" style="gap:0;">
+        <!-- Y-axis region labels -->
+        <div id="heatmapRowLabels" class="d-flex flex-column" style="gap:4px;padding-top:64px;margin-right:8px;flex-shrink:0;">
+          <!-- filled by JS -->
+        </div>
+        <!-- Scrollable date columns -->
+        <div style="overflow-x:auto;flex:1;scrollbar-width:thin;">
+          <div id="heatmapScroll" class="d-flex" style="gap:4px;padding-bottom:8px;">
+            <!-- Auto-Generated Heatmap Columns -->
+          </div>
+        </div>
+      </div>
+
+      <p class="text-muted mt-3 mb-0" id="heatmapFooter" style="font-size:0.75rem;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Radar Chart + Executive Grid ─────────────────────── -->
+<div class="row g-4 mb-5">
+
+  <!-- Radar Chart -->
+  <div class="col-lg-5">
+    <div class="chart-card h-100 d-flex flex-column mt-0">
+      <div>
+        <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Multi-Dimensional View</span>
+        <h4 class="card-title mb-4 mt-1">Median Trajectory Bounds</h4>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+        <div style="width:100%;max-width:380px;">
+          <canvas id="analysisChart"></canvas>
+        </div>
+      </div>
+      <!-- Mini legend -->
+      <div class="d-flex flex-wrap gap-3 mt-3 justify-content-center" style="font-size:0.75rem;">
+        <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(239,68,68,0.5);border:2px solid #ef4444;"></span>Max Absolute</span>
+        <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(20,184,166,0.4);border:2px solid #14b8a6;"></span>Median</span>
+        <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:rgba(148,163,184,0.2);border:2px dashed #94a3b8;"></span>Min Basement</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Executive Log Grid -->
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 mt-0" style="min-height:460px;">
+
+      <!-- Grid Header -->
+      <div class="p-3 px-4 border-bottom d-flex justify-content-between align-items-center bg-white" style="border-color:#e2e8f0!important;">
+        <div>
+          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Data Intelligence</span>
+          <h5 class="fw-bold mb-0 mt-1" style="letter-spacing:-0.01em;font-size:0.95rem;">Executive Log Interrogator</h5>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge" id="rowCountBadge" style="background:#f1f5f9;color:#64748b;font-weight:600;font-size:0.72rem;">—</span>
+          <input type="text" id="gridSearch" class="form-control form-control-sm"
+                 placeholder="Filter date or region…"
+                 style="border-radius:20px;width:190px;font-size:0.85rem;">
+        </div>
+      </div>
+
+      <!-- Sortable Table -->
+      <div class="table-responsive" style="max-height:420px;overflow-y:auto;">
+        <table class="table table-hover align-middle mb-0" id="analysisTable">
+          <thead class="sticky-top" style="top:0;z-index:2;">
+            <tr>
+              <th class="sortable" data-col="date" style="cursor:pointer;white-space:nowrap;">
+                Date <span class="sort-icon text-muted ms-1">⇅</span>
+              </th>
+              <th class="sortable" data-col="region" style="cursor:pointer;">
+                Region <span class="sort-icon text-muted ms-1">⇅</span>
+              </th>
+              <th class="sortable text-end" data-col="level" style="cursor:pointer;white-space:nowrap;">
+                Level (ft) <span class="sort-icon text-muted ms-1">⇅</span>
+              </th>
+              <th class="text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="rawDataTable" style="font-size:0.9rem;">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Grid Footer: Stats Bar -->
+      <div class="px-4 py-2 border-top d-flex gap-4" style="background:#f8fafc;border-color:#e2e8f0!important;font-size:0.78rem;">
+        <span class="text-muted">Min: <strong id="gridMin" class="text-danger">—</strong></span>
+        <span class="text-muted">Max: <strong id="gridMax" class="text-success">—</strong></span>
+        <span class="text-muted">Avg: <strong id="gridAvg" class="text-primary">—</strong></span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let _analysisChartInstance = null;
+
+window.refreshCharts = function() {
+  fetch('/api/analysis_stats')
+    .then(r => r.json())
+    .then(data => {
+        if (!data.summary) return;
+        const sumData = data.summary;
+        const history = data.history.slice().reverse();
+
+        // Clear containers before rebuild (prevents duplicates on re-render)
+        document.getElementById('statsContainer').innerHTML    = '';
+        document.getElementById('heatmapRowLabels').innerHTML  = '';
+        document.getElementById('heatmapScroll').innerHTML     = '';
+
+        buildGauges(sumData);
+        buildRadarChart(sumData);
+        buildHeatmap(data, sumData);
+        buildTable(history, data);
+    })
+    .catch(e => console.warn('Analysis fetch failed:', e));
+};
+
+document.addEventListener('DOMContentLoaded', window.refreshCharts);
+
+  // ── 1. Command Center Gauge Cards ─────────────────────────
+  function buildGauges(sumData) {
+      const container = document.getElementById('statsContainer');
+      for (const [region, stats] of Object.entries(sumData)) {
+          const isUp      = stats.trend === 'up';
+          const pctOfMax  = Math.round((stats.latest / stats.max) * 100);
+          const barColor  = isUp ? '#10b981' : (pctOfMax < 40 ? '#ef4444' : '#f59e0b');
+          const trendIcon = isUp
+              ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--status-green)" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>`
+              : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>`;
+          const trendText  = isUp ? 'Recovery Trend' : 'Depletion Trend';
+          const trendColor = isUp ? 'text-success' : 'text-danger';
+
+          container.innerHTML += `
+            <div class="col-md-3 col-sm-6">
+              <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background:#fff;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <h6 class="fw-bold mb-0" style="letter-spacing:-0.01em;">${region}</h6>
+                  <div class="d-flex align-items-center gap-1 small ${trendColor} fw-semibold">
+                    ${trendIcon} ${trendText}
+                  </div>
+                </div>
+
+                <h2 class="fw-black mb-0" style="letter-spacing:-0.03em;">
+                  ${stats.latest.toFixed(1)}<span style="font-size:1rem;color:#94a3b8;font-weight:500;"> ft</span>
+                </h2>
+                <p class="text-muted mb-3" style="font-size:0.78rem;">Current water level</p>
+
+                <!-- Mini progress bar -->
+                <div style="height:6px;background:#f1f5f9;border-radius:100px;overflow:hidden;margin-bottom:8px;">
+                  <div style="height:100%;width:${pctOfMax}%;background:${barColor};border-radius:100px;transition:width 1s ease;"></div>
+                </div>
+
+                <div class="d-flex justify-content-between" style="font-size:0.72rem;color:#94a3b8;">
+                  <span>Min ${stats.min.toFixed(0)} ft</span>
+                  <span>Avg ${stats.avg.toFixed(1)} ft</span>
+                  <span>Max ${stats.max.toFixed(0)} ft</span>
+                </div>
+              </div>
+            </div>`;
+      }
+  }
+
+  // ── 2. Radar Chart ────────────────────────────────────────
+  function buildRadarChart(sumData) {
+      const labels   = Object.keys(sumData);
+      const averages = labels.map(r => sumData[r].avg.toFixed(2));
+      const maxes    = labels.map(r => sumData[r].max);
+      const mins     = labels.map(r => sumData[r].min);
+
+      const ctx = document.getElementById('analysisChart').getContext('2d');
+      // Destroy previous instance before re-creating
+      if (_analysisChartInstance) { _analysisChartInstance.destroy(); _analysisChartInstance = null; }
+      _analysisChartInstance = new Chart(ctx, {
+          type: 'radar',
+          data: {
+              labels,
+              datasets: [
+                  { label: 'Maximum Absolute', data: maxes,    backgroundColor: 'rgba(239,68,68,0.1)',  borderColor: '#ef4444', borderWidth: 2, pointBackgroundColor: '#ef4444' },
+                  { label: 'Median Operation', data: averages, backgroundColor: 'rgba(20,184,166,0.25)', borderColor: '#14b8a6', borderWidth: 2, pointBackgroundColor: '#14b8a6' },
+                  { label: 'Min Basement',     data: mins,     backgroundColor: 'transparent',          borderColor: '#94a3b8', borderDash: [5,5], borderWidth: 1.5, pointBackgroundColor: '#94a3b8' }
+              ]
+          },
+          options: {
+              responsive: true,
+              plugins: { legend: { display: false } },
+              scales: {
+                  r: {
+                      pointLabels: { font: { weight: '600', size: 12, family: 'Inter' }, color: '#334155' },
+                      grid: { color: '#e2e8f0' },
+                      ticks: { display: false }
+                  }
+              }
+          }
+      });
+  }
+
+  // ── 3. Heatmap ────────────────────────────────────────────
+  function buildHeatmap(data, sumData) {
+      const regions  = Object.keys(sumData);
+      const chronoHistory = data.history.slice(); // oldest first
+      const dateGroups = {};
+      chronoHistory.forEach(row => {
+          if (!dateGroups[row.date]) dateGroups[row.date] = {};
+          dateGroups[row.date][row.region] = row.level;
+      });
+
+      // Build row labels (Y-axis)
+      const rowLabels = document.getElementById('heatmapRowLabels');
+      rowLabels.innerHTML = '';
+      regions.forEach(reg => {
+          const el = document.createElement('div');
+          el.style.cssText = 'font-size:0.68rem;font-weight:600;color:#64748b;height:24px;display:flex;align-items:center;white-space:nowrap;';
+          el.textContent = reg.replace(' Region', '');
+          rowLabels.appendChild(el);
+      });
+
+      // Build heatmap columns
+      const heatmapScroll = document.getElementById('heatmapScroll');
+      heatmapScroll.innerHTML = '';
+      const rangeSpan = data.global_max - data.global_min;
+      const dates     = Object.keys(dateGroups);
+
+      dates.forEach((date, idx) => {
+          const col = document.createElement('div');
+          col.className = 'd-flex flex-column align-items-center';
+          col.style.gap = '4px';
+
+          // Date label (show every ~5th date to avoid crowding)
+          const dateLabel = document.createElement('div');
+          dateLabel.style.cssText = 'font-size:0.55rem;color:#94a3b8;writing-mode:vertical-rl;transform:rotate(180deg);height:60px;display:flex;align-items:center;';
+          dateLabel.textContent = (idx % Math.ceil(dates.length / 12) === 0) ? date : '';
+          col.appendChild(dateLabel);
+
+          regions.forEach(reg => {
+              const cell = document.createElement('div');
+              cell.style.cssText = 'width:20px;height:20px;border-radius:3px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;';
+
+              const val = dateGroups[date][reg];
+              if (val !== undefined) {
+                  const norm = Math.max(0, Math.min(1, (val - data.global_min) / rangeSpan));
+                  const hue  = norm * 120; // 0=red, 120=green
+                  cell.style.backgroundColor = `hsl(${hue}, 75%, 50%)`;
+                  cell.title = `${date} | ${reg}: ${val.toFixed(1)} ft`;
+                  cell.addEventListener('mouseenter', () => {
+                      cell.style.transform = 'scale(1.35)';
+                      cell.style.boxShadow = `0 0 8px hsl(${hue},75%,40%)`;
+                      cell.style.zIndex = '10';
+                  });
+                  cell.addEventListener('mouseleave', () => {
+                      cell.style.transform = '';
+                      cell.style.boxShadow = '';
+                      cell.style.zIndex   = '';
+                  });
+              } else {
+                  cell.style.backgroundColor = '#f1f5f9';
+                  cell.title = `${date} | ${reg}: No data`;
+              }
+              col.appendChild(cell);
+          });
+          heatmapScroll.appendChild(col);
+      });
+
+      document.getElementById('heatmapFooter').textContent =
+          `Showing ${dates.length} time points across ${regions.length} regions. Hover a cell to inspect the exact reading.`;
+  }
+
+  // ── 4. Executive Grid ────────────────────────────────────
+  let sortState = { col: 'date', dir: -1 }; // newest first
+  let allRows   = [];
+  let globalMin, globalMax;
+
+  function buildTable(history, data) {
+      allRows    = history;
+      globalMin  = data.global_min;
+      globalMax  = data.global_max;
+
+      document.getElementById('gridMin').textContent = globalMin.toFixed(1) + ' ft';
+      document.getElementById('gridMax').textContent = globalMax.toFixed(1) + ' ft';
+      const avg = history.reduce((s, r) => s + r.level, 0) / history.length;
+      document.getElementById('gridAvg').textContent = avg.toFixed(1) + ' ft';
+
+      renderTable();
+
+      // Search
+      document.getElementById('gridSearch').addEventListener('input', e => {
+          renderTable(e.target.value);
+      });
+
+      // Sort headers
+      document.querySelectorAll('th.sortable').forEach(th => {
+          th.addEventListener('click', () => {
+              const col = th.dataset.col;
+              if (sortState.col === col) { sortState.dir *= -1; }
+              else { sortState.col = col; sortState.dir = 1; }
+              document.querySelectorAll('th.sortable .sort-icon').forEach(s => s.textContent = '⇅');
+              th.querySelector('.sort-icon').textContent = sortState.dir === 1 ? '↑' : '↓';
+              renderTable(document.getElementById('gridSearch').value);
+          });
+      });
+  }
+
+  function renderTable(filterText = '') {
+      const tableBody = document.getElementById('rawDataTable');
+      tableBody.innerHTML = '';
+
+      let filtered = allRows.filter(row =>
+          row.date.includes(filterText) ||
+          row.region.toLowerCase().includes(filterText.toLowerCase())
+      );
+
+      // Sort
+      filtered.sort((a, b) => {
+          let av = sortState.col === 'level' ? a.level : (sortState.col === 'date' ? a.date : a.region);
+          let bv = sortState.col === 'level' ? b.level : (sortState.col === 'date' ? b.date : b.region);
+          if (av < bv) return -1 * sortState.dir;
+          if (av > bv) return  1 * sortState.dir;
+          return 0;
+      });
+
+      document.getElementById('rowCountBadge').textContent = `${filtered.length} records`;
+
+      filtered.forEach(row => {
+          const norm     = (row.level - globalMin) / (globalMax - globalMin);
+          const hue      = Math.round(norm * 120);
+          const isDanger = norm < 0.25;
+          const isGood   = norm > 0.75;
+          let statusHtml;
+          if (isDanger)      statusHtml = `<span class="status-badge red">Critical</span>`;
+          else if (!isGood)  statusHtml = `<span class="status-badge yellow">Warning</span>`;
+          else               statusHtml = `<span class="status-badge green">Stable</span>`;
+
+          const levelColor = isDanger ? '#dc2626' : (isGood ? '#059669' : '#0f172a');
+
+          tableBody.innerHTML += `
+            <tr>
+              <td class="text-muted" style="font-size:0.82rem;font-family:monospace;">${row.date}</td>
+              <td class="fw-semibold">${row.region}</td>
+              <td class="text-end fw-bold" style="color:${levelColor};font-variant-numeric:tabular-nums;">
+                ${row.level.toFixed(2)}
+                <span style="display:inline-block;width:36px;height:5px;border-radius:3px;background:hsl(${hue},70%,50%);margin-left:8px;vertical-align:middle;"></span>
+              </td>
+              <td class="text-center">${statusHtml}</td>
+            </tr>`;
+      });
+
+      if (!filtered.length) {
+          tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted" style="font-size:0.9rem;">No matching records found.</td></tr>`;
+      }
+  }
+
+</script>
+{% endblock %}
