@@ -16,7 +16,12 @@ from models import db, User, WaterReading, MitigationLog
 
 app = Flask(__name__)
 app.secret_key = 'hydrotrack_super_secret_stratum_2025'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hydro_data.db'
+
+db_url = os.environ.get('DATABASE_URL', 'sqlite:///hydro_data.db')
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Allow OAuth over plain HTTP in local dev
 os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')

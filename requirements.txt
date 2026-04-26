@@ -8,3 +8,4 @@ Flask-SQLAlchemy
 scipy
 gunicorn
 python-dotenv
+psycopg2-binary
