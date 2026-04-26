@@ -27,6 +27,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
 
 db.init_app(app)
+with app.app_context():
+    db.create_all()
+
 bcrypt = Bcrypt(app)
 
 # ── Google OAuth blueprint ────────────────────────────────────────────────────
