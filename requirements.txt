@@ -4,6 +4,7 @@ scikit-learn==1.4.1.post1
 numpy==1.26.4
 flask-login
 flask-bcrypt
+flask-dance
 Flask-SQLAlchemy
 scipy
 gunicorn
