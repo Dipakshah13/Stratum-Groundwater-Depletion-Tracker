@@ -99,6 +99,7 @@ def load_data():
         uid = current_user.id if current_user and current_user.is_authenticated else None
         if uid is None:
             return pd.DataFrame()
+        db.session.expire_all()  # force fresh read from DB
         readings = WaterReading.query.filter_by(user_id=uid).all()
         if not readings:
             return pd.DataFrame()
@@ -453,6 +454,21 @@ def alerts():
     return render_template('alerts.html', alerts=alerts_data)
 
 # ── API Endpoints ─────────────────────────────────────────────────────────────
+
+@app.route('/api/debug')
+@login_required
+def api_debug():
+    try:
+        uid = current_user.id
+        total = WaterReading.query.count()
+        mine = WaterReading.query.filter_by(user_id=uid).count()
+        regions = [r.region for r in WaterReading.query.filter_by(user_id=uid).all()]
+        return jsonify({'user_id': uid, 'name': current_user.name,
+                        'my_readings': mine, 'total_readings': total,
+                        'regions': list(set(regions))})
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 
 @app.route('/api/historical')
 @login_required
