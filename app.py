@@ -274,10 +274,12 @@ def upload_file():
         flash('Please upload a .csv file.')
         return redirect(request.referrer or url_for('dashboard'))
 
-    file.save(DATA_FILE)
+    # Vercel/serverless: only /tmp is writable
+    tmp_path = os.path.join('/tmp', 'upload.csv')
+    file.save(tmp_path)
 
     try:
-        df = pd.read_csv(DATA_FILE)
+        df = pd.read_csv(tmp_path)
         if df.empty:
             flash('The uploaded CSV is empty.')
             return redirect(request.referrer or url_for('dashboard'))
