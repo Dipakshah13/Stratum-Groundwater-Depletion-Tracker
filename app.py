@@ -99,15 +99,18 @@ def load_data():
         uid = current_user.id if current_user and current_user.is_authenticated else None
         if uid is None:
             return pd.DataFrame()
-        df = pd.read_sql_query(
-            'SELECT * FROM water_reading WHERE user_id = ?',
-            db.engine, params=(uid,)
-        )
-        if not df.empty:
-            df['date'] = pd.to_datetime(df['date'])
+        readings = WaterReading.query.filter_by(user_id=uid).all()
+        if not readings:
+            return pd.DataFrame()
+        df = pd.DataFrame([{
+            'date': r.date, 'region': r.region,
+            'water_level': r.water_level, 'depletion_rate': r.depletion_rate,
+            'status': r.status, 'lat': r.lat, 'lng': r.lng
+        } for r in readings])
+        df['date'] = pd.to_datetime(df['date'])
         return df
     except Exception as e:
-        print("Error loading DB layer", e)
+        print("Error loading DB layer:", e)
         return pd.DataFrame()
 
 # ── Auth Routes ───────────────────────────────────────────────────────────────
