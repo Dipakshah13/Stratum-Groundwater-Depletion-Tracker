@@ -1,4 +1,6 @@
 import os
+from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy.pool import NullPool
 import uuid
 import pandas as pd
 import numpy as np
@@ -15,16 +17,28 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from models import db, User, WaterReading, MitigationLog
 
 app = Flask(__name__)
-app.secret_key = 'hydrotrack_super_secret_stratum_2025'
+app.secret_key = os.environ.get('SECRET_KEY', 'hydrotrack_super_secret_stratum_2025')
+# Trust reverse proxy (Vercel/InsForge) so Flask generates https:// URLs
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 db_url = os.environ.get('DATABASE_URL', 'sqlite:///hydro_data.db')
 if db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# Allow OAuth over plain HTTP in local dev
-os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
+
+# Serverless fix: NullPool prevents stale connections between function calls
+if os.environ.get('FLASK_ENV') == 'production':
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'poolclass': NullPool,
+        'pool_pre_ping': True,
+    }
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    app.config['SESSION_COOKIE_HTTPONLY'] = True
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
+else:
+    os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
 
 db.init_app(app)
 with app.app_context():
