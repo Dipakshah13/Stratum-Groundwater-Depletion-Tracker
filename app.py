@@ -65,7 +65,7 @@ login_manager.login_message = ''          # suppress default flash
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 DATA_FILE = os.path.join(app.root_path, 'data', 'groundwater_data.csv')
 
@@ -90,12 +90,15 @@ def load_data():
         uid = current_user.id if current_user and current_user.is_authenticated else None
         if uid is None:
             return pd.DataFrame()
-        df = pd.read_sql_query(
-            'SELECT * FROM water_reading WHERE user_id = ?',
-            db.engine, params=(uid,)
-        )
-        if not df.empty:
-            df['date'] = pd.to_datetime(df['date'])
+        readings = WaterReading.query.filter_by(user_id=uid).all()
+        if not readings:
+            return pd.DataFrame()
+        df = pd.DataFrame([{
+            'date': r.date, 'region': r.region,
+            'water_level': r.water_level, 'depletion_rate': r.depletion_rate,
+            'status': r.status, 'lat': r.lat, 'lng': r.lng
+        } for r in readings])
+        df['date'] = pd.to_datetime(df['date'])
         return df
     except Exception as e:
         print("Error loading DB layer", e)
@@ -213,10 +216,14 @@ def login_guest():
 @login_required
 def logout():
     # Delete guest accounts on logout to keep DB clean
-    if current_user.is_guest:
-        user = User.query.get(current_user.id)
-        db.session.delete(user)
-        db.session.commit()
+    try:
+        if current_user.is_guest:
+            user = db.session.get(User, current_user.id)
+            if user:
+                db.session.delete(user)
+                db.session.commit()
+    except Exception as e:
+        print("Logout cleanup error:", e)
     logout_user()
     return redirect(url_for('login'))
 
