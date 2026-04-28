@@ -1,6 +1,5 @@
 import os
 from werkzeug.middleware.proxy_fix import ProxyFix
-from sqlalchemy.pool import NullPool
 import uuid
 import pandas as pd
 import numpy as np
@@ -27,11 +26,11 @@ if db_url.startswith("postgres://"):
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Serverless fix: NullPool prevents stale connections between function calls
+# Production DB pool: pre_ping reconnects on stale connections
 if os.environ.get('FLASK_ENV') == 'production':
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'poolclass': NullPool,
         'pool_pre_ping': True,
+        'pool_recycle': 280,
     }
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
