@@ -10,3 +10,4 @@ scipy
 gunicorn
 python-dotenv
 psycopg2-binary
+flask-dance
