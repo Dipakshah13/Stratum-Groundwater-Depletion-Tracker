@@ -43,10 +43,10 @@
             <label class="form-label text-muted small fw-bold text-uppercase mb-0"
               style="letter-spacing:0.07em;">Forecast Horizon</label>
             <span class="badge rounded-pill fw-bold" id="monthOutLabel"
-              style="background:var(--brand-primary-light);color:var(--brand-primary);font-size:0.78rem;padding:5px 12px;">5
+              style="background:var(--brand-primary-light);color:var(--brand-primary);font-size:0.78rem;padding:5px 12px;">10
               Years</span>
           </div>
-          <input type="range" class="form-range" id="monthSlider" min="6" max="120" step="6" value="60">
+          <input type="range" class="form-range" id="monthSlider" min="6" max="120" step="6" value="120">
           <div class="d-flex justify-content-between mt-1">
             <span class="text-muted" style="font-size:0.7rem;">6 mo</span>
             <span class="text-muted" style="font-size:0.7rem;">2 yr</span>
@@ -479,10 +479,9 @@
   window.refreshCharts = function () { fetchPrediction(); };
 
   document.addEventListener('DOMContentLoaded', function () {
-    fetchPrediction();
+    fetchPrediction(); // Initial load
 
-    document.getElementById('runPredictBtn').addEventListener('click', fetchPrediction);
-
+    // Consolidated listeners for live updates
     document.getElementById('monthSlider').addEventListener('input', function (e) {
       document.getElementById('monthOutLabel').textContent = formatHorizonLabel(e.target.value);
       fetchPrediction();
@@ -494,6 +493,7 @@
     });
 
     document.getElementById('regionSelect').addEventListener('change', fetchPrediction);
+    document.getElementById('runPredictBtn').addEventListener('click', fetchPrediction);
   });
 </script>
 {% endblock %}
