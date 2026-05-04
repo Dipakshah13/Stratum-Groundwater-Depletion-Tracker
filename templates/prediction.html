@@ -43,10 +43,10 @@
             <label class="form-label text-muted small fw-bold text-uppercase mb-0"
               style="letter-spacing:0.07em;">Forecast Horizon</label>
             <span class="badge rounded-pill fw-bold" id="monthOutLabel"
-              style="background:var(--brand-primary-light);color:var(--brand-primary);font-size:0.78rem;padding:5px 12px;">1
-              Year</span>
+              style="background:var(--brand-primary-light);color:var(--brand-primary);font-size:0.78rem;padding:5px 12px;">5
+              Years</span>
           </div>
-          <input type="range" class="form-range" id="monthSlider" min="6" max="60" step="6" value="12">
+          <input type="range" class="form-range" id="monthSlider" min="6" max="60" step="6" value="60">
           <div class="d-flex justify-content-between mt-1">
             <span class="text-muted" style="font-size:0.7rem;">6 mo</span>
             <span class="text-muted" style="font-size:0.7rem;">1 yr</span>
@@ -485,14 +485,14 @@
 
     document.getElementById('monthSlider').addEventListener('input', function (e) {
       document.getElementById('monthOutLabel').textContent = formatHorizonLabel(e.target.value);
+      fetchPrediction();
     });
 
     document.getElementById('policySlider').addEventListener('input', function (e) {
       document.getElementById('mitigationOutLabel').textContent = e.target.value + '% Reduction';
+      fetchPrediction();
     });
 
-    document.getElementById('monthSlider').addEventListener('change', fetchPrediction);
-    document.getElementById('policySlider').addEventListener('change', fetchPrediction);
     document.getElementById('regionSelect').addEventListener('change', fetchPrediction);
   });
 </script>
