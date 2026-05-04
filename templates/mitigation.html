@@ -291,8 +291,11 @@ function previewImpact() {
     document.getElementById('previewRegionLabel').textContent = region;
     document.getElementById('previewPctLabel').textContent    = pct + '%';
 
-    fetch(`/api/predict/${encodeURIComponent(region)}?months=12&mitigation=${pct}`)
-        .then(r => r.json())
+    fetch(`/api/predict?region=${encodeURIComponent(region)}&months=12&mitigation=${pct}`)
+        .then(r => {
+            if (!r.ok) throw new Error('API error: ' + r.status);
+            return r.json();
+        })
         .then(data => {
             if (!data.historical) return;
 
@@ -361,6 +364,9 @@ function previewImpact() {
                     interaction: { mode: 'nearest', axis: 'x', intersect: false }
                 }
             });
+        })
+        .catch(err => {
+            console.error('Mitigation Preview Error:', err);
         });
 }
 
