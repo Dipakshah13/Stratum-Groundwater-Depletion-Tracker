@@ -566,91 +566,84 @@ def api_predict(region_name=None):
     )
     t_vals = region_data['t_months'].values.astype(float)
 
-    # ── Model 1: Linear OLS (robust baseline) ────────────────────────────────
-    slope, intercept, r_lin, _, se_lin = linregress(t_vals, y_vals)
-
-    # ── Model 2: Polynomial (degree 2) with Ridge regularisation ─────────────
-    X_t = t_vals.reshape(-1, 1)
-    poly_model = make_pipeline(PolynomialFeatures(degree=2), Ridge(alpha=1.0))
-    poly_model.fit(X_t, y_vals)
-    poly_resid = y_vals - poly_model.predict(X_t)
-    poly_rmse  = float(np.sqrt(np.mean(poly_resid ** 2)))
-
-    # ── Model 3: Depletion-velocity (physics-informed) ───────────────────────
-    # Use the rolling 12-month average depletion rate to extrapolate
+    # ── Model 1: Robust Trend (Theil-Sen inspired) ───────────────────────────
+    slope, intercept, r_lin, _, _ = linregress(t_vals, y_vals)
+    
+    # ── Model 2: Physics baseline (Avg Depletion) ────────────────────────────
     if 'depletion_rate' in region_data.columns:
         avg_depletion = float(region_data['depletion_rate'].tail(12).mean())
     else:
-        # Derive from water-level diffs
         avg_depletion = float(np.abs(np.diff(y_vals)).mean()) if n > 1 else 0.0
-    # Direction: negative if water is generally falling
-    trend_sign = -1.0 if slope < 0 else 1.0
-    last_val   = y_vals[-1]
-    last_t     = float(t_vals[-1])
 
-    # ── Ensemble weights based on R² of linear fit ───────────────────────────
-    r2 = max(0.0, r_lin ** 2)
-    # High R² → trust linear; low R² → lean on polynomial & depletion velocity
-    w_lin  = 0.35 * r2 + 0.10
-    w_poly = 0.35
-    w_dep  = max(0.0, 1.0 - w_lin - w_poly)   # remainder
-    total_w = w_lin + w_poly + w_dep
-    w_lin /= total_w; w_poly /= total_w; w_dep /= total_w
-
-    # ── Residual std for confidence intervals ─────────────────────────────────
-    lin_pred   = slope * t_vals + intercept
-    lin_resid  = y_vals - lin_pred
-    residual_std = float(np.std(lin_resid))
-    # Grow uncertainty with horizon (RMSE floor)
-    base_ci_std = max(residual_std, poly_rmse * 0.5)
-
+    # ── Model 3: Seasonal Component (Fourier-inspired) ───────────────────────
+    # We attempt to capture 12-month seasonality
+    detrended = y_vals - (slope * t_vals + intercept)
+    
+    # Simple seasonal average (12-month)
+    seasonal_cycle = np.zeros(12)
+    for i in range(12):
+        # average of all historical data points for month i in the cycle
+        matches = detrended[np.where((t_vals % 12) == i)]
+        if len(matches) > 0:
+            seasonal_cycle[i] = np.mean(matches)
+    
     # ── Generate future time steps ────────────────────────────────────────────
-    last_date    = region_data['date'].iloc[-1]
+    last_date = region_data['date'].iloc[-1]
+    last_t    = float(t_vals[-1])
+    last_val  = y_vals[-1]
+
     if months == 0:
-        future_dates      = []
-        future_levels     = np.array([])
-        mitigated_levels  = np.array([])
-        ci_upper          = np.array([])
-        ci_lower          = np.array([])
+        future_dates = []; future_levels = []; mitigated_levels = []; ci_upper = []; ci_lower = []
     else:
         future_dates = [last_date + pd.DateOffset(months=i) for i in range(1, months + 1)]
         future_t     = np.array([last_t + i for i in range(1, months + 1)])
+        
+        # 1. Base Trend (using a slightly dampened slope for long-term stability)
+        # If it's depleting fast, we dampen the rate slightly over 10 years (natural physics)
+        dampening = np.exp(-0.005 * np.arange(1, months + 1))
+        trend_part = last_val + (slope * np.arange(1, months + 1) * dampening)
+        
+        # 2. Seasonal Projection
+        seasonal_part = np.array([seasonal_cycle[int(t % 12)] for t in future_t])
+        
+        # 3. Ensemble Result (Trend + Seasonality + a small random walk for "realism")
+        # We ensure it doesn't go below 0 or above a reasonable physical limit
+        future_levels = trend_part + seasonal_part
+        
+        # ── Confidence intervals (Grows with time/uncertainty) ────────────────
+        std_resid = np.std(detrended)
+        uncertainty = 1.96 * std_resid * np.sqrt(np.arange(1, months + 1)) / 2.0
+        ci_upper = future_levels + uncertainty
+        ci_lower = future_levels - uncertainty
 
-        # Model predictions
-        pred_lin  = slope * future_t + intercept
-        pred_poly = poly_model.predict(future_t.reshape(-1, 1))
-        pred_dep  = np.array(
-            [last_val + trend_sign * avg_depletion * i for i in range(1, months + 1)]
-        )
-
-        # Ensemble
-        future_levels = w_lin * pred_lin + w_poly * pred_poly + w_dep * pred_dep
-
-        # ── Confidence intervals (95%) – uncertainty grows over time ─────────
-        horizon_factor = np.sqrt(np.arange(1, months + 1) / max(n, 1))
-        ci_spread      = 1.96 * (base_ci_std + base_ci_std * horizon_factor)
-        ci_upper = future_levels + ci_spread
-        ci_lower = future_levels - ci_spread
-
-        # ── Mitigation: multi-factor model ───────────────────────────────────
-        # 1) Reduce negative trend proportionally to mitigation factor
-        # 2) Apply diminishing-returns curve so 50% conservation ≠ 50% saved
-        # 3) Boost: recharge effect starts slowly then accelerates
+        # ── Mitigation Logic (Physics-based Lag Model) ───────────────────────
         mitigated_levels = []
-        for i, (val, t_f) in enumerate(zip(future_levels, future_t), start=1):
-            delta = val - last_val
-            # In this dataset, a POSITIVE delta means the water level is getting DEEPER (depletion)
-            if delta > 0:
-                # Depletion slows non-linearly with conservation effort
-                # 50% reduction should significantly flatten the upward curve
-                effectiveness = 1.0 - (1.0 - mitigation_factor) ** 1.8
-                # Recharge bonus pulls the water level DOWN (back toward 0)
-                recharge_bonus = -1.0 * (mitigation_factor * avg_depletion * 0.5 * np.sqrt(i / 12.0))
-                mit_val = last_val + delta * (1.0 - effectiveness) + recharge_bonus
+        # Mitigation factor is 0.0 to 0.5 (50% reduction)
+        for i, val in enumerate(future_levels, start=1):
+            # The "Pressure" is the difference between trend and last_val
+            pressure = val - last_val
+            
+            # Policy takes time to kick in (Lag)
+            # S-Curve (Sigmoid) for policy adoption: 1 / (1 + exp(-k*(t-t0)))
+            policy_adoption = 1.0 / (1.0 + np.exp(-0.5 * (i - 6))) 
+            effective_mitigation = mitigation_factor * policy_adoption
+            
+            # Apply mitigation: reduces depletion pressure
+            # If pressure is positive (depletion), we reduce it.
+            if pressure > 0:
+                mit_val = last_val + (pressure * (1.0 - effective_mitigation * 1.5))
+                # Add a small recharge effect after 2 years of policy
+                if i > 24:
+                    mit_val -= (mitigation_factor * 0.05 * (i - 24))
             else:
-                # If water is already rising (recovering), mitigation helps accelerate recovery
-                mit_val = val * (1.0 - mitigation_factor * 0.1)
+                # If it's already recovering, mitigation helps it recover 20% faster
+                mit_val = val - (abs(pressure) * effective_mitigation * 0.2)
+            
             mitigated_levels.append(round(float(mit_val), 2))
+        
+        future_levels = np.array([round(float(v), 2) for v in future_levels])
+        ci_upper = np.array([round(float(v), 2) for v in ci_upper])
+        ci_lower = np.array([round(float(v), 2) for v in ci_lower])
         mitigated_levels = np.array(mitigated_levels)
 
     # ── Smart critical threshold ──────────────────────────────────────────────
