@@ -11,21 +11,28 @@
       <div class="card-body p-4">
 
         <div class="d-flex align-items-center gap-2 mb-1">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">What-If Scenario Builder</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+          <span
+            style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">What-If
+            Scenario Builder</span>
         </div>
         <h5 class="fw-bold mb-4" style="letter-spacing:-0.01em;">Simulation Parameters</h5>
 
         <!-- Region Select -->
         <div class="mb-4">
-          <label for="regionSelect" class="form-label text-muted small fw-bold text-uppercase" style="letter-spacing:0.07em;">Target Region</label>
+          <label for="regionSelect" class="form-label text-muted small fw-bold text-uppercase"
+            style="letter-spacing:0.07em;">Target Region</label>
           <select id="regionSelect" class="form-select shadow-none">
             {% if regions %}
-              {% for r in regions %}
-              <option value="{{ r }}">{{ r }}</option>
-              {% endfor %}
+            {% for r in regions %}
+            <option value="{{ r }}">{{ r }}</option>
+            {% endfor %}
             {% else %}
-              <option value="">No data — upload a dataset first</option>
+            <option value="">No data — upload a dataset first</option>
             {% endif %}
           </select>
         </div>
@@ -33,8 +40,11 @@
         <!-- Forecast Horizon Slider -->
         <div class="mb-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <label class="form-label text-muted small fw-bold text-uppercase mb-0" style="letter-spacing:0.07em;">Forecast Horizon</label>
-            <span class="badge rounded-pill fw-bold" id="monthOutLabel" style="background:var(--brand-primary-light);color:var(--brand-primary);font-size:0.78rem;padding:5px 12px;">1 Year</span>
+            <label class="form-label text-muted small fw-bold text-uppercase mb-0"
+              style="letter-spacing:0.07em;">Forecast Horizon</label>
+            <span class="badge rounded-pill fw-bold" id="monthOutLabel"
+              style="background:var(--brand-primary-light);color:var(--brand-primary);font-size:0.78rem;padding:5px 12px;">1
+              Year</span>
           </div>
           <input type="range" class="form-range" id="monthSlider" min="6" max="60" step="6" value="12">
           <div class="d-flex justify-content-between mt-1">
@@ -50,17 +60,24 @@
         <!-- Mitigation Policy Slider -->
         <div class="mb-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <label class="form-label text-muted small fw-bold text-uppercase mb-0" style="letter-spacing:0.07em;">Conservation Policy</label>
-            <span class="badge rounded-pill fw-bold" id="mitigationOutLabel" style="background:#d1fae5;color:#059669;font-size:0.78rem;padding:5px 12px;">0% Reduction</span>
+            <label class="form-label text-muted small fw-bold text-uppercase mb-0"
+              style="letter-spacing:0.07em;">Conservation Policy</label>
+            <span class="badge rounded-pill fw-bold" id="mitigationOutLabel"
+              style="background:#d1fae5;color:#059669;font-size:0.78rem;padding:5px 12px;">0% Reduction</span>
           </div>
           <input type="range" class="form-range" id="policySlider" min="0" max="50" step="5" value="0"
-                 style="accent-color: #059669;">
-          <p class="text-muted mt-1 mb-0" style="font-size:0.72rem;">Simulates enforcement of groundwater conservation measures to reduce extraction pressure.</p>
+            style="accent-color: #059669;">
+          <p class="text-muted mt-1 mb-0" style="font-size:0.72rem;">Simulates enforcement of groundwater conservation
+            measures to reduce extraction pressure.</p>
         </div>
 
         <!-- Run Button -->
-        <button id="runPredictBtn" class="btn btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background:var(--brand-primary);border:none;border-radius:10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <button id="runPredictBtn"
+          class="btn btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm"
+          style="background:var(--brand-primary);border:none;border-radius:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
           Run AI Simulation
         </button>
 
@@ -69,7 +86,8 @@
 
         <!-- Risk Score Panel -->
         <div id="riskPanel" class="d-none">
-          <p class="text-muted small fw-bold text-uppercase mb-3" style="letter-spacing:0.07em;">Aquifer Risk Assessment</p>
+          <p class="text-muted small fw-bold text-uppercase mb-3" style="letter-spacing:0.07em;">Aquifer Risk Assessment
+          </p>
 
           <!-- Risk Meter -->
           <div class="mb-3">
@@ -78,7 +96,9 @@
               <span class="small fw-bold" id="riskScoreLabel">—</span>
             </div>
             <div style="height:8px;background:#f1f5f9;border-radius:100px;overflow:hidden;">
-              <div id="riskBar" style="height:100%;width:0%;border-radius:100px;transition:width 0.8s ease;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);background-size:300% 100%;"></div>
+              <div id="riskBar"
+                style="height:100%;width:0%;border-radius:100px;transition:width 0.8s ease;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);background-size:300% 100%;">
+              </div>
             </div>
           </div>
 
@@ -105,10 +125,15 @@
         </div>
 
         <!-- All-Clear Panel -->
-        <div id="safePanelMsg" class="d-none text-center py-3 rounded-3" style="background:#f0fdf4;border:1px solid #bbf7d0;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" class="mb-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div id="safePanelMsg" class="d-none text-center py-3 rounded-3"
+          style="background:#f0fdf4;border:1px solid #bbf7d0;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" class="mb-2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
           <p class="small fw-bold mb-0" style="color:#15803d;">System Status: SAFE</p>
-          <p class="text-muted mb-0" style="font-size:0.72rem;">No critical thresholds projected within forecast window.</p>
+          <p class="text-muted mb-0" style="font-size:0.72rem;">No critical thresholds projected within forecast window.
+          </p>
         </div>
 
       </div>
@@ -122,14 +147,21 @@
     <div class="chart-card mt-0 flex-grow-1" style="min-height:380px;">
       <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
-          <span style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Depletion Trajectory</span>
+          <span
+            style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Depletion
+            Trajectory</span>
           <h3 class="card-title mb-0 mt-1">Predicted Water Level Curve</h3>
         </div>
         <div class="d-flex gap-2 flex-wrap justify-content-end" id="chartLegend" style="font-size:0.75rem;">
-          <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:18px;height:3px;background:#334155;border-radius:2px;"></span>Historical</span>
-          <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:18px;height:3px;background:#3b82f6;border-radius:2px;border-bottom:2px dashed #3b82f6;"></span>Predicted</span>
-          <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:18px;height:3px;background:#10b981;border-radius:2px;"></span>Mitigated</span>
-          <span class="d-flex align-items-center gap-1 text-muted"><span style="display:inline-block;width:18px;height:8px;background:rgba(59,130,246,0.15);border-radius:2px;border:1px dashed #93c5fd;"></span>95% CI</span>
+          <span class="d-flex align-items-center gap-1 text-muted"><span
+              style="display:inline-block;width:18px;height:3px;background:#334155;border-radius:2px;"></span>Historical</span>
+          <span class="d-flex align-items-center gap-1 text-muted"><span
+              style="display:inline-block;width:18px;height:3px;background:#3b82f6;border-radius:2px;border-bottom:2px dashed #3b82f6;"></span>Predicted</span>
+          <span class="d-flex align-items-center gap-1 text-muted"><span
+              style="display:inline-block;width:18px;height:3px;background:#10b981;border-radius:2px;"></span>Mitigated</span>
+          <span class="d-flex align-items-center gap-1 text-muted"><span
+              style="display:inline-block;width:18px;height:8px;background:rgba(59,130,246,0.15);border-radius:2px;border:1px dashed #93c5fd;"></span>95%
+            CI</span>
         </div>
       </div>
       <canvas id="predictChart" height="180"></canvas>
@@ -139,21 +171,24 @@
     <div class="row g-3" id="impactRow">
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#fff;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Projected End Level</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
+            Projected End Level</p>
           <h4 class="fw-black mb-0" id="projectedLevel" style="letter-spacing:-0.02em;color:var(--text-primary);">—</h4>
           <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Baseline at end of forecast</p>
         </div>
       </div>
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#fff;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Intervention Gain</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
+            Intervention Gain</p>
           <h4 class="fw-black mb-0" id="interventionGain" style="letter-spacing:-0.02em;color:#059669;">—</h4>
           <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Level saved via conservation</p>
         </div>
       </div>
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#fff;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Critical Threshold</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
+            Critical Threshold</p>
           <h4 class="fw-black mb-0" id="criticalThresholdVal" style="letter-spacing:-0.02em;color:#dc2626;">—</h4>
           <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Danger level (5th-pct historical)</p>
         </div>
@@ -164,21 +199,24 @@
     <div class="row g-3 mt-0" id="modelRow">
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#f8fafc;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Depletion Velocity</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
+            Depletion Velocity</p>
           <h4 class="fw-black mb-0" id="depletionVelocity" style="letter-spacing:-0.02em;color:#7c3aed;">—</h4>
           <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Linear trend (units/year)</p>
         </div>
       </div>
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#f8fafc;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Model R²</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Model
+            R²</p>
           <h4 class="fw-black mb-0" id="rSquaredVal" style="letter-spacing:-0.02em;color:#0284c7;">—</h4>
           <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Ensemble goodness-of-fit</p>
         </div>
       </div>
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#f8fafc;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Forecast Confidence</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
+            Forecast Confidence</p>
           <h4 class="fw-black mb-0" id="confidenceScore" style="letter-spacing:-0.02em;color:#059669;">—</h4>
           <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">CI stability over horizon</p>
         </div>
@@ -191,246 +229,267 @@
 
 {% block scripts %}
 <script>
-let predictChartInstance = null;
+  let predictChartInstance = null;
 
-function formatHorizonLabel(months) {
+  function formatHorizonLabel(months) {
     months = parseInt(months);
     if (months < 12) return months + ' Months';
     const yrs = months / 12;
     return (Number.isInteger(yrs) ? yrs : yrs.toFixed(1)) + ' Year' + (yrs !== 1 ? 's' : '');
-}
+  }
 
-function fetchPrediction() {
-    const region     = document.getElementById('regionSelect').value;
-    const months     = document.getElementById('monthSlider').value;
+  function fetchPredic() {
+    const region = document.getElementById('regionSelect').value;
+    const months = document.getElementById('monthSlider').value;
     const mitigation = document.getElementById('policySlider').value;
 
     const btn = document.getElementById('runPredictBtn');
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing…';
     btn.disabled = true;
 
+    if (!region) {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
+      btn.disabled = false;
+      return;
+    }
+
     fetch(`/api/predict/${encodeURIComponent(region)}?months=${months}&mitigation=${mitigation}`)
-        .then(r => r.json())
-        .then(data => {
-            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
-            btn.disabled = false;
+      .then(r => r.json())
+      .then(data => {
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
+        btn.disabled = false;
 
-            if (!data.historical || !data.historical.data || data.historical.data.length === 0) {
-                const ctx = document.getElementById('predictChart').getContext('2d');
-                if (predictChartInstance) predictChartInstance.destroy();
-                document.getElementById('projectedLevel').textContent = '—';
-                document.getElementById('interventionGain').textContent = '—';
-                document.getElementById('criticalThresholdVal').textContent = '—';
-                console.warn('No prediction data returned:', data);
-                return;
-            }
+        if (data.error) {
+          const ctx = document.getElementById('predictChart').getContext('2d');
+          if (predictChartInstance) predictChartInstance.destroy();
 
-            const allLabels  = [...data.historical.labels, ...data.predicted.labels];
-            const histData   = [...data.historical.data,   ...Array(data.predicted.labels.length).fill(null)];
+          // Clear metrics
+          ['projectedLevel', 'interventionGain', 'criticalThresholdVal', 'depletionVelocity', 'rSquaredVal', 'confidenceScore'].forEach(id => {
+            document.getElementById(id).textContent = '—';
+          });
 
-            const predData = [...Array(data.historical.labels.length - 1).fill(null)];
-            predData.push(data.historical.data[data.historical.data.length - 1]);
-            predData.push(...data.predicted.data);
+          // Show error in a toast or similar (here we'll use a simple alert-style indicator if needed, 
+          // but for now just log and clear as per current "dont change" constraint)
+          console.error('Prediction Error:', data.error);
+          return;
+        }
 
-            const mitigatedData = [...Array(data.historical.labels.length - 1).fill(null)];
-            mitigatedData.push(data.historical.data[data.historical.data.length - 1]);
-            mitigatedData.push(...data.predicted.mitigated);
+        if (!data.historical || !data.historical.data || data.historical.data.length === 0) {
+          const ctx = document.getElementById('predictChart').getContext('2d');
+          if (predictChartInstance) predictChartInstance.destroy();
+          ['projectedLevel', 'interventionGain', 'criticalThresholdVal'].forEach(id => {
+            document.getElementById(id).textContent = '—';
+          });
+          console.warn('No prediction data returned:', data);
+          return;
+        }
 
-            // ── Impact Summary ──────────────────────────────────────
-            const hasPred = data.predicted.data && data.predicted.data.length > 0;
-            const lastPred      = hasPred ? data.predicted.data[data.predicted.data.length - 1] : null;
-            const lastMitigated = hasPred ? data.predicted.mitigated[data.predicted.mitigated.length - 1] : null;
-            const gain          = (lastPred !== null && lastMitigated !== null) ? lastMitigated - lastPred : null;
+        const allLabels = [...data.historical.labels, ...data.predicted.labels];
+        const histData = [...data.historical.data, ...Array(data.predicted.labels.length).fill(null)];
 
-            document.getElementById('projectedLevel').textContent   = lastPred !== null ? lastPred.toFixed(1) + ' ft' : '—';
-            document.getElementById('interventionGain').textContent  = gain !== null ? (gain >= 0 ? '+' : '') + gain.toFixed(1) + ' ft' : '—';
-            document.getElementById('interventionGain').style.color  = gain !== null ? (gain >= 0 ? '#059669' : '#dc2626') : '#64748b';
-            document.getElementById('criticalThresholdVal').textContent = data.analysis.critical_threshold.toFixed(1) + ' ft';
+        const predData = [...Array(data.historical.labels.length - 1).fill(null)];
+        predData.push(data.historical.data[data.historical.data.length - 1]);
+        predData.push(...data.predicted.data);
 
-            // ── Model Intelligence ─────────────────────────────────
-            const vel = data.analysis.depletion_velocity;
-            document.getElementById('depletionVelocity').textContent = (vel >= 0 ? '+' : '') + vel.toFixed(2) + ' ft/yr';
-            document.getElementById('depletionVelocity').style.color = vel < 0 ? '#dc2626' : '#059669';
-            document.getElementById('rSquaredVal').textContent = (data.analysis.r_squared * 100).toFixed(1) + '%';
-            const cs = data.analysis.confidence_score;
-            document.getElementById('confidenceScore').textContent = cs.toFixed(1) + '/100';
-            document.getElementById('confidenceScore').style.color = cs > 70 ? '#059669' : cs > 40 ? '#d97706' : '#dc2626';
+        const mitigatedData = [...Array(data.historical.labels.length - 1).fill(null)];
+        mitigatedData.push(data.historical.data[data.historical.data.length - 1]);
+        mitigatedData.push(...data.predicted.mitigated);
 
-            // ── Risk Score ──────────────────────────────────────────
-            const riskPanel    = document.getElementById('riskPanel');
-            const safePanelMsg = document.getElementById('safePanelMsg');
+        // ── Impact Summary ──────────────────────────────────────
+        const hasPred = data.predicted.data && data.predicted.data.length > 0;
+        const lastPred = hasPred ? data.predicted.data[data.predicted.data.length - 1] : null;
+        const lastMitigated = hasPred ? data.predicted.mitigated[data.predicted.mitigated.length - 1] : null;
+        const gain = (lastPred !== null && lastMitigated !== null) ? lastMitigated - lastPred : null;
 
-            if (data.analysis.eta_critical !== 'SAFE') {
-                riskPanel.classList.remove('d-none');
-                safePanelMsg.classList.add('d-none');
+        document.getElementById('projectedLevel').textContent = lastPred !== null ? lastPred.toFixed(1) + ' ft' : '—';
+        document.getElementById('interventionGain').textContent = gain !== null ? (gain >= 0 ? '+' : '') + gain.toFixed(1) + ' ft' : '—';
+        document.getElementById('interventionGain').style.color = gain !== null ? (gain >= 0 ? '#059669' : '#dc2626') : '#64748b';
+        document.getElementById('criticalThresholdVal').textContent = data.analysis.critical_threshold.toFixed(1) + ' ft';
 
-                document.getElementById('baselineEta').textContent  = data.analysis.eta_critical;
-                document.getElementById('mitigatedEta').textContent =
-                    data.analysis.eta_mitigated === 'SAFE' ? '✓ Safe w/ Policy' : data.analysis.eta_mitigated;
+        // ── Model Intelligence ─────────────────────────────────
+        const vel = data.analysis.depletion_velocity;
+        document.getElementById('depletionVelocity').textContent = (vel >= 0 ? '+' : '') + vel.toFixed(2) + ' ft/yr';
+        document.getElementById('depletionVelocity').style.color = vel < 0 ? '#dc2626' : '#059669';
+        document.getElementById('rSquaredVal').textContent = (data.analysis.r_squared * 100).toFixed(1) + '%';
+        const cs = data.analysis.confidence_score;
+        document.getElementById('confidenceScore').textContent = cs.toFixed(1) + '/100';
+        document.getElementById('confidenceScore').style.color = cs > 70 ? '#059669' : cs > 40 ? '#d97706' : '#dc2626';
 
-                // Risk bar: how close last prediction is to critical threshold
-                const histMin     = Math.min(...data.historical.data);
-                const range       = histMin - data.analysis.critical_threshold;
-                const gap         = lastPred - data.analysis.critical_threshold;
-                const riskPct     = Math.max(0, Math.min(100, 100 - (gap / range) * 100));
-                const riskBar     = document.getElementById('riskBar');
-                riskBar.style.width     = riskPct + '%';
-                riskBar.style.backgroundPositionX = (100 - riskPct) + '%';
-                document.getElementById('riskScoreLabel').textContent = Math.round(riskPct) + '/100';
-                document.getElementById('riskScoreLabel').style.color =
-                    riskPct > 70 ? '#dc2626' : riskPct > 40 ? '#d97706' : '#059669';
-            } else {
-                riskPanel.classList.add('d-none');
-                safePanelMsg.classList.remove('d-none');
-            }
+        // ── Risk Score ──────────────────────────────────────────
+        const riskPanel = document.getElementById('riskPanel');
+        const safePanelMsg = document.getElementById('safePanelMsg');
 
-            // ── Chart ──────────────────────────────────────────────
-            const ctx = document.getElementById('predictChart').getContext('2d');
-            if (predictChartInstance) predictChartInstance.destroy();
+        if (data.analysis.eta_critical !== 'SAFE') {
+          riskPanel.classList.remove('d-none');
+          safePanelMsg.classList.add('d-none');
 
-            // ── Build CI band arrays ────────────────────────────
-            const ciUpperData = [...Array(data.historical.labels.length - 1).fill(null)];
-            ciUpperData.push(data.historical.data[data.historical.data.length - 1]);
-            ciUpperData.push(...(data.predicted.ci_upper || []));
+          document.getElementById('baselineEta').textContent = data.analysis.eta_critical;
+          document.getElementById('mitigatedEta').textContent =
+            data.analysis.eta_mitigated === 'SAFE' ? '✓ Safe w/ Policy' : data.analysis.eta_mitigated;
 
-            const ciLowerData = [...Array(data.historical.labels.length - 1).fill(null)];
-            ciLowerData.push(data.historical.data[data.historical.data.length - 1]);
-            ciLowerData.push(...(data.predicted.ci_lower || []));
+          // Risk bar: how close last prediction is to critical threshold
+          const histMin = Math.min(...data.historical.data);
+          const range = histMin - data.analysis.critical_threshold;
+          const gap = lastPred - data.analysis.critical_threshold;
+          const riskPct = Math.max(0, Math.min(100, 100 - (gap / range) * 100));
+          const riskBar = document.getElementById('riskBar');
+          riskBar.style.width = riskPct + '%';
+          riskBar.style.backgroundPositionX = (100 - riskPct) + '%';
+          document.getElementById('riskScoreLabel').textContent = Math.round(riskPct) + '/100';
+          document.getElementById('riskScoreLabel').style.color =
+            riskPct > 70 ? '#dc2626' : riskPct > 40 ? '#d97706' : '#059669';
+        } else {
+          riskPanel.classList.add('d-none');
+          safePanelMsg.classList.remove('d-none');
+        }
 
-            predictChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: allLabels,
-                    datasets: [
-                        {
-                            label: 'CI Upper',
-                            data: ciUpperData,
-                            borderColor: 'transparent',
-                            backgroundColor: 'rgba(59,130,246,0.10)',
-                            borderWidth: 0,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            fill: '+1',
-                            order: 10
-                        },
-                        {
-                            label: 'CI Lower',
-                            data: ciLowerData,
-                            borderColor: 'rgba(147,197,253,0.5)',
-                            backgroundColor: 'rgba(59,130,246,0.04)',
-                            borderWidth: 1,
-                            borderDash: [3, 3],
-                            tension: 0.4,
-                            pointRadius: 0,
-                            fill: false,
-                            order: 11
-                        },
-                        {
-                            label: 'Historical',
-                            data: histData,
-                            borderColor: '#334155',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2.5,
-                            tension: 0.4,
-                            pointBackgroundColor: '#334155',
-                            pointRadius: 3,
-                            pointHoverRadius: 5,
-                            order: 1
-                        },
-                        {
-                            label: 'Predicted (Ensemble)',
-                            data: predData,
-                            borderColor: '#3b82f6',
-                            borderDash: [6, 4],
-                            backgroundColor: 'transparent',
-                            borderWidth: 2.5,
-                            tension: 0.4,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#3b82f6',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            fill: false,
-                            order: 2
-                        },
-                        {
-                            label: 'Mitigated (~' + mitigation + '% conservation)',
-                            data: mitigatedData,
-                            borderColor: '#10b981',
-                            borderDash: [5, 4],
-                            backgroundColor: 'rgba(16,185,129,0.07)',
-                            borderWidth: 2.5,
-                            tension: 0.4,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#10b981',
-                            pointBorderWidth: 2,
-                            fill: true,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
-                            order: 3
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(15,23,42,0.92)',
-                            titleFont: { size: 12, family: 'Inter', weight: '600' },
-                            bodyFont:  { size: 13, family: 'Inter', weight: 'bold' },
-                            padding: 14,
-                            boxPadding: 5,
-                            usePointStyle: true,
-                            filter: item => !['CI Upper','CI Lower'].includes(item.dataset.label),
-                            callbacks: {
-                                label: ctx => ctx.parsed.y !== null
-                                    ? ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ft`
-                                    : null
-                            }
-                        },
-                        annotation: {}
-                    },
-                    scales: {
-                        y: {
-                            grid: { color: '#f1f5f9' },
-                            border: { display: false },
-                            ticks: { font: { family: 'Inter' }, color: '#64748b', callback: v => v + ' ft' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8', maxTicksLimit: 10 }
-                        }
-                    },
-                    interaction: { mode: 'nearest', axis: 'x', intersect: false }
+        // ── Chart ──────────────────────────────────────────────
+        const ctx = document.getElementById('predictChart').getContext('2d');
+        if (predictChartInstance) predictChartInstance.destroy();
+
+        // ── Build CI band arrays ────────────────────────────
+        const ciUpperData = [...Array(data.historical.labels.length - 1).fill(null)];
+        ciUpperData.push(data.historical.data[data.historical.data.length - 1]);
+        ciUpperData.push(...(data.predicted.ci_upper || []));
+
+        const ciLowerData = [...Array(data.historical.labels.length - 1).fill(null)];
+        ciLowerData.push(data.historical.data[data.historical.data.length - 1]);
+        ciLowerData.push(...(data.predicted.ci_lower || []));
+
+        predictChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: allLabels,
+            datasets: [
+              {
+                label: 'CI Upper',
+                data: ciUpperData,
+                borderColor: 'transparent',
+                backgroundColor: 'rgba(59,130,246,0.10)',
+                borderWidth: 0,
+                tension: 0.4,
+                pointRadius: 0,
+                fill: '+1',
+                order: 10
+              },
+              {
+                label: 'CI Lower',
+                data: ciLowerData,
+                borderColor: 'rgba(147,197,253,0.5)',
+                backgroundColor: 'rgba(59,130,246,0.04)',
+                borderWidth: 1,
+                borderDash: [3, 3],
+                tension: 0.4,
+                pointRadius: 0,
+                fill: false,
+                order: 11
+              },
+              {
+                label: 'Historical',
+                data: histData,
+                borderColor: '#334155',
+                backgroundColor: 'transparent',
+                borderWidth: 2.5,
+                tension: 0.4,
+                pointBackgroundColor: '#334155',
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                order: 1
+              },
+              {
+                label: 'Predicted (Ensemble)',
+                data: predData,
+                borderColor: '#3b82f6',
+                borderDash: [6, 4],
+                backgroundColor: 'transparent',
+                borderWidth: 2.5,
+                tension: 0.4,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3b82f6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                fill: false,
+                order: 2
+              },
+              {
+                label: 'Mitigated (~' + mitigation + '% conservation)',
+                data: mitigatedData,
+                borderColor: '#10b981',
+                borderDash: [5, 4],
+                backgroundColor: 'rgba(16,185,129,0.07)',
+                borderWidth: 2.5,
+                tension: 0.4,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#10b981',
+                pointBorderWidth: 2,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                order: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                backgroundColor: 'rgba(15,23,42,0.92)',
+                titleFont: { size: 12, family: 'Inter', weight: '600' },
+                bodyFont: { size: 13, family: 'Inter', weight: 'bold' },
+                padding: 14,
+                boxPadding: 5,
+                usePointStyle: true,
+                filter: item => !['CI Upper', 'CI Lower'].includes(item.dataset.label),
+                callbacks: {
+                  label: ctx => ctx.parsed.y !== null
+                    ? ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ft`
+                    : null
                 }
-            });
-        })
-        .catch(() => {
-            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
-            btn.disabled = false;
+              },
+              annotation: {}
+            },
+            scales: {
+              y: {
+                grid: { color: '#f1f5f9' },
+                border: { display: false },
+                ticks: { font: { family: 'Inter' }, color: '#64748b', callback: v => v + ' ft' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { font: { family: 'Inter', size: 11 }, color: '#94a3b8', maxTicksLimit: 10 }
+              }
+            },
+            interaction: { mode: 'nearest', axis: 'x', intersect: false }
+          }
         });
-}
+      })
+      .catch(() => {
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
+        btn.disabled = false;
+      });
+  }
 
-window.refreshCharts = function() { fetchPrediction(); };
+  window.refreshCharts = function () { fetchPrediction(); };
 
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     fetchPrediction();
 
     document.getElementById('runPredictBtn').addEventListener('click', fetchPrediction);
 
-    document.getElementById('monthSlider').addEventListener('input', function(e) {
-        document.getElementById('monthOutLabel').textContent = formatHorizonLabel(e.target.value);
+    document.getElementById('monthSlider').addEventListener('input', function (e) {
+      document.getElementById('monthOutLabel').textContent = formatHorizonLabel(e.target.value);
     });
 
-    document.getElementById('policySlider').addEventListener('input', function(e) {
-        document.getElementById('mitigationOutLabel').textContent = e.target.value + '% Reduction';
+    document.getElementById('policySlider').addEventListener('input', function (e) {
+      document.getElementById('mitigationOutLabel').textContent = e.target.value + '% Reduction';
     });
 
     document.getElementById('monthSlider').addEventListener('change', fetchPrediction);
     document.getElementById('policySlider').addEventListener('change', fetchPrediction);
     document.getElementById('regionSelect').addEventListener('change', fetchPrediction);
-});
+  });
 </script>
 {% endblock %}

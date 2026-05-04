@@ -217,9 +217,34 @@ def login_guest():
     )
     db.session.add(guest)
     db.session.commit()
+    seed_guest_data(guest.id)
     login_user(guest, remember=False)
-    flash('You are browsing as a guest. Your session will not be saved.', 'info')
+    flash('You are browsing as a guest with demo data. Your session will not be saved.', 'info')
     return redirect(url_for('dashboard'))
+
+def seed_guest_data(user_id):
+    """Seed a guest user with sample data from groundwater_data.csv if available."""
+    try:
+        csv_path = os.path.join(app.root_path, 'data', 'groundwater_data.csv')
+        if not os.path.exists(csv_path):
+            return
+        df = pd.read_csv(csv_path)
+        df = smart_normalize(df)
+        for _, row in df.iterrows():
+            lat, lng = get_lat_lng(str(row['region']))
+            wr = WaterReading(
+                user_id=user_id,
+                date=row['date'],
+                region=str(row['region']),
+                lat=lat, lng=lng,
+                water_level=float(row['water_level']),
+                depletion_rate=float(row['depletion_rate']),
+                status=str(row['status'])
+            )
+            db.session.add(wr)
+        db.session.commit()
+    except Exception as e:
+        print(f"Failed to seed guest data: {e}")
 
 
 @app.route('/logout')
@@ -500,11 +525,20 @@ def api_analysis_stats():
         }
     return jsonify({'summary': stats, 'history': history, 'global_min': float(df['water_level'].min()), 'global_max': float(df['water_level'].max())})
 
-@app.route('/api/predict/<region_name>')
+@app.route('/api/predict/<path:region_name>')
+@app.route('/api/predict')
 @login_required
-def api_predict(region_name):
+def api_predict(region_name=None):
+    if not region_name:
+        region_name = request.args.get('region')
+        
+    if not region_name:
+        return jsonify({'error': 'No region specified for prediction.'})
+    
+    region_name = region_name.strip()
+        
     df = load_data()
-    if df.empty: return jsonify({})
+    if df.empty: return jsonify({'error': 'No data available for your account. Please upload a CSV first.'})
 
     # ── Parameters ────────────────────────────────────────────────────────────
     # months: 0–60 (0–5 years). 0 means show only historical baseline.
@@ -648,26 +682,31 @@ def api_predict(region_name):
         ci_width_end = ci_width_start = 0.0
     confidence_score = round(max(0, min(100, 100 - (ci_width_end - ci_width_start))), 1)
 
+    # ── Final safety check for NaN/Inf values ─────────────────────────────────
+    def _safe_list(arr):
+        if not hasattr(arr, '__len__') or len(arr) == 0: return []
+        return [float(x) if (np.isfinite(x)) else 0.0 for x in arr]
+
     return jsonify({
         'historical': {
             'labels': region_data['date'].dt.strftime('%Y-%m-%d').tolist(),
-            'data':   np.round(y_vals, 2).tolist()
+            'data':   _safe_list(y_vals)
         },
         'predicted': {
             'labels':    [d.strftime('%Y-%m-%d') for d in future_dates],
-            'data':      np.round(future_levels, 2).tolist() if len(future_levels) else [],
-            'mitigated': np.round(mitigated_levels, 2).tolist() if len(mitigated_levels) else [],
-            'ci_upper':  np.round(ci_upper, 2).tolist() if len(ci_upper) else [],
-            'ci_lower':  np.round(ci_lower, 2).tolist() if len(ci_lower) else []
+            'data':      _safe_list(future_levels),
+            'mitigated': _safe_list(mitigated_levels),
+            'ci_upper':  _safe_list(ci_upper),
+            'ci_lower':  _safe_list(ci_lower)
         },
         'analysis': {
             'eta_critical':        eta_critical,
             'eta_mitigated':       eta_mitigated,
-            'critical_threshold':  critical_threshold,
-            'depletion_velocity':  depletion_velocity,
-            'r_squared':           round(r2, 3),
-            'confidence_score':    confidence_score,
-            'model_weights':       {'linear': round(w_lin, 2), 'polynomial': round(w_poly, 2), 'depletion': round(w_dep, 2)}
+            'critical_threshold':  float(critical_threshold),
+            'depletion_velocity':  float(depletion_velocity) if np.isfinite(depletion_velocity) else 0.0,
+            'r_squared':           float(r2) if np.isfinite(r2) else 0.0,
+            'confidence_score':    float(confidence_score) if np.isfinite(confidence_score) else 0.0,
+            'model_weights':       {k: float(v) for k, v in {'linear': w_lin, 'polynomial': w_poly, 'depletion': w_dep}.items()}
         }
     })
 
