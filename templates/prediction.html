@@ -238,22 +238,32 @@
     return (Number.isInteger(yrs) ? yrs : yrs.toFixed(1)) + ' Year' + (yrs !== 1 ? 's' : '');
   }
 
+  let predictionAbortController = null;
+
   function fetchPrediction() {
+    if (predictionAbortController) {
+      predictionAbortController.abort();
+    }
+    predictionAbortController = new AbortController();
+
+    const btn = document.getElementById('runPredictBtn');
     const region = document.getElementById('regionSelect').value;
     const months = document.getElementById('monthSlider').value;
     const mitigation = document.getElementById('policySlider').value;
 
-    const btn = document.getElementById('runPredictBtn');
+    if (!region) return;
+
+    // Optional: Add a subtle loading state to cards
+    ['projectedLevel', 'interventionGain', 'criticalThresholdVal'].forEach(id => {
+      document.getElementById(id).style.opacity = '0.7';
+    });
+
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing…';
     btn.disabled = true;
 
-    if (!region) {
-      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
-      btn.disabled = false;
-      return;
-    }
-
-    fetch(`/api/predict?region=${encodeURIComponent(region)}&months=${months}&mitigation=${mitigation}`)
+    fetch(`/api/predict?region=${encodeURIComponent(region)}&months=${months}&mitigation=${mitigation}`, {
+      signal: predictionAbortController.signal
+    })
       .then(r => {
         if (!r.ok) throw new Error('API error: ' + r.status);
         return r.json();
@@ -317,6 +327,11 @@
         const cs = data.analysis.confidence_score;
         document.getElementById('confidenceScore').textContent = cs.toFixed(1) + '/100';
         document.getElementById('confidenceScore').style.color = cs > 70 ? '#059669' : cs > 40 ? '#d97706' : '#dc2626';
+
+        // Reset card opacity
+        ['projectedLevel', 'interventionGain', 'criticalThresholdVal'].forEach(id => {
+          document.getElementById(id).style.opacity = '1';
+        });
 
         // ── Risk Score ──────────────────────────────────────────
         const riskPanel = document.getElementById('riskPanel');
@@ -470,8 +485,12 @@
         });
       })
       .catch(err => {
+        if (err.name === 'AbortError') return; 
         btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run AI Simulation';
         btn.disabled = false;
+        ['projectedLevel', 'interventionGain', 'criticalThresholdVal'].forEach(id => {
+          document.getElementById(id).style.opacity = '1';
+        });
         console.error('Prediction Fetch Error:', err);
       });
   }
