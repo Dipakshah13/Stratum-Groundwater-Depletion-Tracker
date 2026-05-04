@@ -639,15 +639,17 @@ def api_predict(region_name=None):
         mitigated_levels = []
         for i, (val, t_f) in enumerate(zip(future_levels, future_t), start=1):
             delta = val - last_val
-            if delta < 0:
+            # In this dataset, a POSITIVE delta means the water level is getting DEEPER (depletion)
+            if delta > 0:
                 # Depletion slows non-linearly with conservation effort
-                effectiveness = 1.0 - (1.0 - mitigation_factor) ** 1.5
-                # Recharge bonus: small positive recovery modelled as sqrt growth
-                recharge_bonus = mitigation_factor * avg_depletion * 0.3 * np.sqrt(i / 12.0)
+                # 50% reduction should significantly flatten the upward curve
+                effectiveness = 1.0 - (1.0 - mitigation_factor) ** 1.8
+                # Recharge bonus pulls the water level DOWN (back toward 0)
+                recharge_bonus = -1.0 * (mitigation_factor * avg_depletion * 0.5 * np.sqrt(i / 12.0))
                 mit_val = last_val + delta * (1.0 - effectiveness) + recharge_bonus
             else:
-                # If water is rising, mitigation has minimal effect
-                mit_val = val * (1.0 + mitigation_factor * 0.05)
+                # If water is already rising (recovering), mitigation helps accelerate recovery
+                mit_val = val * (1.0 - mitigation_factor * 0.1)
             mitigated_levels.append(round(float(mit_val), 2))
         mitigated_levels = np.array(mitigated_levels)
 
