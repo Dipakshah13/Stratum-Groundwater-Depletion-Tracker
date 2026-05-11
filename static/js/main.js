@@ -20,34 +20,32 @@ function _getAudioCtx() {
 // Plays a professional "Sonar Pulse" alert
 function _playOnePulse(ctx) {
     const now = ctx.currentTime;
+    // Increase volume to 0.8 for better audibility
     const masterGain = ctx.createGain();
-    masterGain.gain.setValueAtTime(0.4, now);
+    masterGain.gain.setValueAtTime(0.8, now);
     masterGain.connect(ctx.destination);
 
-    // Filter for a cleaner, high-end "electronic" feel
     const filter = ctx.createBiquadFilter();
     filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(1200, now);
-    filter.Q.setValueAtTime(1, now);
+    filter.frequency.setValueAtTime(1000, now);
+    filter.Q.setValueAtTime(1.2, now);
     filter.connect(masterGain);
 
-    // Two layered oscillators for a rich, scientific sound
-    [1200, 2400].forEach((freq, idx) => {
+    [1000, 2000].forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const env = ctx.createGain();
         
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, now);
         
-        // Sonar "Ping" envelope
         env.gain.setValueAtTime(0, now);
-        env.gain.linearRampToValueAtTime(0.8 - (idx * 0.3), now + 0.05);
-        env.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        env.gain.linearRampToValueAtTime(0.9 - (idx * 0.3), now + 0.04);
+        env.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
         
         osc.connect(env);
         env.connect(filter);
         osc.start(now);
-        osc.stop(now + 1.5);
+        osc.stop(now + 1.8);
     });
 }
 
@@ -55,7 +53,6 @@ function stopGlobalAlarm() {
     _alarmActive = false;
     if (_alarmLoopTimer) { clearTimeout(_alarmLoopTimer); _alarmLoopTimer = null; }
     
-    // Update UI
     const indicator = document.getElementById('alarmIndicator');
     if (indicator) indicator.classList.add('d-none');
     
@@ -68,7 +65,7 @@ function stopGlobalAlarm() {
 
 function playGlobalAlarm() {
     const toggle = document.getElementById('alertSystemToggle');
-    if (toggle && !toggle.checked) return; // Muted
+    if (toggle && !toggle.checked) return;
     if (_alarmActive) return;
     
     _alarmActive = true;
@@ -91,7 +88,7 @@ function playGlobalAlarm() {
 
         const doPlay = () => {
             _playOnePulse(audioCtx);
-            _alarmLoopTimer = setTimeout(_loop, 3500); // 3.5s interval is less "spammy"
+            _alarmLoopTimer = setTimeout(_loop, 4000); 
         };
 
         if (audioCtx.state === 'suspended') {
@@ -102,6 +99,23 @@ function playGlobalAlarm() {
     }
     _loop();
 }
+
+// Explicit test function to unlock AudioContext and verify sound
+window.testAlarmSound = function() {
+    const ctx = _getAudioCtx();
+    if (!ctx) { alert("Web Audio not supported in this browser."); return; }
+    
+    ctx.resume().then(() => {
+        _playOnePulse(ctx);
+        // Temporarily highlight the status dot to show visual feedback
+        const dot = document.getElementById('systemStatusDot');
+        if (dot) {
+            const orig = dot.style.background;
+            dot.style.background = '#3b82f6';
+            setTimeout(() => { dot.style.background = orig; }, 1000);
+        }
+    });
+};
 
 // ── Notification UI ──────────────────────────────────────────────────────────
 function updateAlertSummary(alerts) {
@@ -115,7 +129,7 @@ function updateAlertSummary(alerts) {
         return;
     }
 
-    summary.innerHTML = `<span class="text-danger fw-bold">${alerts.length} Critical Alert${alerts.length > 1 ? 's' : ''}</span> detected across ${[...new Set(alerts.map(a => a.region))].length} region(s). Action required.`;
+    summary.innerHTML = `<span class="text-danger fw-bold">${alerts.length} Critical Alert${alerts.length > 1 ? 's' : ''}</span> detected. Action required.`;
     summary.classList.add('text-danger');
 }
 
@@ -130,9 +144,7 @@ function showGlobalToast(alerts) {
         document.body.appendChild(container);
     }
     
-    // Clear old toasts to prevent spam
     container.innerHTML = '';
-
     const toast = document.createElement('div');
     toast.className = 'animate-critical shadow-lg';
     toast.style.cssText = 'width:380px;margin:0;padding:20px;background:white;border-radius:16px;border-left:6px solid #dc2626;display:flex;flex-direction:column;gap:12px;border:1px solid rgba(220,38,36,0.1);';
@@ -235,7 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
     
-    // Start polling
-    setInterval(checkUpdates, 4000); // 4s is more professional for production
+    // Unlock AudioContext on first click anywhere
+    document.body.addEventListener('click', () => {
+        const ctx = _getAudioCtx();
+        if (ctx && ctx.state === 'suspended') ctx.resume();
+    }, { once: true });
+
+    setInterval(checkUpdates, 4000); 
     checkUpdates();
 });

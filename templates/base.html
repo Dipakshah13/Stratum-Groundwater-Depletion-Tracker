@@ -93,6 +93,13 @@
                         Silence Alarm
                     </button>
                 </div>
+                
+                <div class="mt-2">
+                    <button onclick="testAlarmSound()" class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-1" style="font-size:0.65rem; color:var(--text-tertiary); font-weight:600;">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                        Test System Audio
+                    </button>
+                </div>
             </div>
             
             <a href="{{ url_for('logout') }}" class="nav-link text-danger d-flex align-items-center gap-2 px-3 py-3 mt-2" style="font-size: 0.88rem; font-weight: 600; transition: all 0.2s;">
