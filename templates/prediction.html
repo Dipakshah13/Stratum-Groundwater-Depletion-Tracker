@@ -74,7 +74,8 @@
         <!-- Run Button -->
         <button id="runPredictBtn"
           class="btn btn-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm"
-          style="background:var(--brand-primary);border:none;border-radius:10px;">
+          style="background:var(--brand-primary);border:none;border-radius:10px;"
+          {% if not regions %}disabled title="Upload a dataset first"{% endif %}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
@@ -167,8 +168,8 @@
       <canvas id="predictChart" height="180"></canvas>
     </div>
 
-    <!-- Impact Summary Row -->
-    <div class="row g-3" id="impactRow">
+    <!-- Impact Summary Row (Top 3) -->
+    <div class="row g-3" id="impactRowTop">
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#fff;border-color:#e2e8f0!important;">
           <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
@@ -195,34 +196,60 @@
       </div>
     </div>
 
-    <!-- Model Intelligence Row -->
-    <div class="row g-3 mt-0" id="modelRow">
+    <!-- Impact Summary Row (Bottom 3) -->
+    <div class="row g-3 mt-0" id="impactRowBottom">
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#f8fafc;border-color:#e2e8f0!important;">
           <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
             Depletion Velocity</p>
-          <h4 class="fw-black mb-0" id="depletionVelocity" style="letter-spacing:-0.02em;color:#7c3aed;">—</h4>
-          <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Linear trend (units/year)</p>
+          <h4 class="fw-black mb-0" id="depletionVelocity" style="letter-spacing:-0.02em;color:var(--text-primary);">—</h4>
+          <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Linear trend (ft/year)</p>
         </div>
       </div>
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#f8fafc;border-color:#e2e8f0!important;">
-          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">Model
-            R²</p>
-          <h4 class="fw-black mb-0" id="rSquaredVal" style="letter-spacing:-0.02em;color:#0284c7;">—</h4>
-          <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Ensemble goodness-of-fit</p>
+          <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
+            Model Accuracy</p>
+          <h4 class="fw-black mb-0" id="rSquaredVal" style="letter-spacing:-0.02em;color:var(--text-primary);">—</h4>
+          <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Coefficient of determination</p>
         </div>
       </div>
       <div class="col-md-4">
         <div class="rounded-3 border p-3 h-100" style="background:#f8fafc;border-color:#e2e8f0!important;">
           <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size:0.68rem;letter-spacing:0.08em;">
             Forecast Confidence</p>
-          <h4 class="fw-black mb-0" id="confidenceScore" style="letter-spacing:-0.02em;color:#059669;">—</h4>
-          <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">CI stability over horizon</p>
+          <h4 class="fw-black mb-0" id="confidenceScore" style="letter-spacing:-0.02em;color:var(--text-primary);">—</h4>
+          <p class="text-muted mb-0 mt-1" style="font-size:0.75rem;">Statistical stability score</p>
         </div>
       </div>
     </div>
 
+    <!-- AI Insight Panel -->
+    <div class="card border-0 shadow-sm rounded-4 mt-4" id="aiInsightCard" style="display:none; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="p-2 rounded-3" style="background:var(--brand-primary); color:white;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h5 class="fw-bold mb-0">Groq AI Analysis</h5>
+        </div>
+        <div id="aiInsightLoading" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="text-muted small mt-2">Generating expert analysis...</p>
+        </div>
+        <div id="aiInsightContent" class="text-secondary" style="font-size:0.95rem; line-height:1.6; display:none;">
+          <!-- Insight text goes here -->
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .ai-formatted-content { font-size: 0.95rem; }
+      .ai-formatted-content strong { color: #1e293b; font-weight: 700; }
+      .ai-formatted-content br { margin-bottom: 8px; display: block; content: ""; }
+    </style>
   </div>
 </div>
 {% endblock %}
@@ -239,6 +266,41 @@
   }
 
   let predictionAbortController = null;
+
+  function fetchAIInsight(region, stats, mitigation, gain) {
+    const card = document.getElementById('aiInsightCard');
+    const loading = document.getElementById('aiInsightLoading');
+    const content = document.getElementById('aiInsightContent');
+
+    card.style.display = 'block';
+    loading.style.display = 'block';
+    content.style.display = 'none';
+
+    fetch('/api/ai_analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ region, stats, mitigation, gain })
+    })
+    .then(r => r.json())
+    .then(data => {
+      loading.style.display = 'none';
+      content.style.display = 'block';
+      if (data.insight) {
+        // Simple Markdown to HTML (Bold and Newlines)
+        let formatted = data.insight
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\n/g, '<br>');
+        content.innerHTML = `<div class="ai-formatted-content">${formatted}</div>`;
+      } else if (data.error) {
+        content.innerHTML = `<p class="text-danger small mb-0">AI Error: ${data.error}</p>`;
+      }
+    })
+    .catch(err => {
+      loading.style.display = 'none';
+      content.style.display = 'block';
+      content.innerHTML = `<p class="text-danger small mb-0">Failed to connect to Groq API.</p>`;
+    });
+  }
 
   function fetchPrediction() {
     if (predictionAbortController) {
@@ -297,7 +359,7 @@
           return;
         }
 
-        const allLabels = [...data.historical.labels, ...data.predicted.labels];
+        const allLabels = [...data.historical.labels, ...data.predicted.labels].map(String);
         const histData = [...data.historical.data, ...Array(data.predicted.labels.length).fill(null)];
 
         const predData = [...Array(data.historical.labels.length - 1).fill(null)];
@@ -309,7 +371,7 @@
         mitigatedData.push(...data.predicted.mitigated);
 
         // ── Impact Summary ──────────────────────────────────────
-        const hasPred = data.predicted.data && data.predicted.data.length > 0;
+        const hasPred = data.predicted && data.predicted.data && data.predicted.data.length > 0;
         const lastPred = hasPred ? data.predicted.data[data.predicted.data.length - 1] : null;
         const lastMitigated = hasPred ? data.predicted.mitigated[data.predicted.mitigated.length - 1] : null;
         const gain = (lastPred !== null && lastMitigated !== null) ? lastMitigated - lastPred : null;
@@ -317,19 +379,25 @@
         document.getElementById('projectedLevel').textContent = lastPred !== null ? lastPred.toFixed(1) + ' ft' : '—';
         document.getElementById('interventionGain').textContent = gain !== null ? (gain >= 0 ? '+' : '') + gain.toFixed(1) + ' ft' : '—';
         document.getElementById('interventionGain').style.color = gain !== null ? (gain >= 0 ? '#059669' : '#dc2626') : '#64748b';
-        document.getElementById('criticalThresholdVal').textContent = data.analysis.critical_threshold.toFixed(1) + ' ft';
+        document.getElementById('criticalThresholdVal').textContent = (data.analysis.critical_threshold || 0).toFixed(1) + ' ft';
 
         // ── Model Intelligence ─────────────────────────────────
-        const vel = data.analysis.depletion_velocity;
+        const vel = data.analysis.depletion_velocity || 0;
         document.getElementById('depletionVelocity').textContent = (vel >= 0 ? '+' : '') + vel.toFixed(2) + ' ft/yr';
         document.getElementById('depletionVelocity').style.color = vel < 0 ? '#dc2626' : '#059669';
-        document.getElementById('rSquaredVal').textContent = (data.analysis.r_squared * 100).toFixed(1) + '%';
-        const cs = data.analysis.confidence_score;
+        
+        const r2 = data.analysis.r_squared || 0;
+        document.getElementById('rSquaredVal').textContent = (r2 * 100).toFixed(1) + '%';
+        
+        const cs = data.analysis.confidence_score || 0;
         document.getElementById('confidenceScore').textContent = cs.toFixed(1) + '/100';
         document.getElementById('confidenceScore').style.color = cs > 70 ? '#059669' : cs > 40 ? '#d97706' : '#dc2626';
 
+        // Fetch AI Insight from Groq
+        fetchAIInsight(region, data.analysis, mitigation, gain ? gain.toFixed(1) : 0);
+
         // Reset card opacity
-        ['projectedLevel', 'interventionGain', 'criticalThresholdVal'].forEach(id => {
+        ['projectedLevel', 'interventionGain', 'criticalThresholdVal', 'depletionVelocity', 'rSquaredVal', 'confidenceScore'].forEach(id => {
           document.getElementById(id).style.opacity = '1';
         });
 
@@ -366,13 +434,18 @@
         if (predictChartInstance) predictChartInstance.destroy();
 
         // ── Build CI band arrays ────────────────────────────
-        const ciUpperData = [...Array(data.historical.labels.length - 1).fill(null)];
-        ciUpperData.push(data.historical.data[data.historical.data.length - 1]);
-        ciUpperData.push(...(data.predicted.ci_upper || []));
+        const hasCI = data.predicted && data.predicted.ci_upper && data.predicted.ci_upper.length > 0;
+        const ciUpperData = hasCI ? [...Array(data.historical.labels.length - 1).fill(null)] : [];
+        if (hasCI) {
+          ciUpperData.push(data.historical.data[data.historical.data.length - 1]);
+          ciUpperData.push(...data.predicted.ci_upper);
+        }
 
-        const ciLowerData = [...Array(data.historical.labels.length - 1).fill(null)];
-        ciLowerData.push(data.historical.data[data.historical.data.length - 1]);
-        ciLowerData.push(...(data.predicted.ci_lower || []));
+        const ciLowerData = hasCI ? [...Array(data.historical.labels.length - 1).fill(null)] : [];
+        if (hasCI) {
+          ciLowerData.push(data.historical.data[data.historical.data.length - 1]);
+          ciLowerData.push(...data.predicted.ci_lower);
+        }
 
         predictChartInstance = new Chart(ctx, {
           type: 'line',

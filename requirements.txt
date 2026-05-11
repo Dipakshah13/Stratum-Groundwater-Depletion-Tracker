@@ -11,3 +11,4 @@ gunicorn
 python-dotenv
 psycopg2-binary
 flask-dance
+groq

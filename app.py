@@ -14,6 +14,7 @@ from sklearn.metrics import mean_squared_error
 from flask_bcrypt import Bcrypt
 from flask_dance.contrib.google import make_google_blueprint, google
 from models import db, User, WaterReading, MitigationLog
+from groq import Groq
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'hydrotrack_super_secret_stratum_2025')
@@ -35,9 +36,20 @@ if os.environ.get('FLASK_ENV') == 'production':
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
-else:
     os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
+
+# Force HTTPS for OAuth redirects in production
+if os.environ.get('FLASK_ENV') == 'production' or os.environ.get('VERCEL'):
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
+
+# ── Cache Control ─────────────────────────────────────────────────────────────
+@app.after_request
+def add_header(response):
+    """Prevent caching of protected pages to ensure logout works instantly."""
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
 
 db.init_app(app)
 with app.app_context():
@@ -72,9 +84,17 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message = ''          # suppress default flash
 
+# ── Groq AI Setup ─────────────────────────────────────────────────────────────
+groq_client = None
+if os.environ.get('GROQ_API_KEY'):
+    groq_client = Groq(api_key=os.environ.get('GROQ_API_KEY'))
+
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return User.query.get(int(user_id))
+    except Exception:
+        return None
 
 DATA_FILE = os.path.join(app.root_path, 'data', 'groundwater_data.csv')
 
@@ -118,8 +138,18 @@ def load_data():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # If forced logout, don't auto-redirect
+    if request.args.get('force') == '1':
+        return render_template('login.html')
+
+    # Only auto-redirect if the user is truly authenticated and exists in DB
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        # Extra safety: ensure user wasn't just deleted (e.g. guest logout)
+        db_user = User.query.get(current_user.id)
+        if db_user:
+            return redirect(url_for('dashboard'))
+        else:
+            logout_user() # Clean up stale session
 
     if request.method == 'POST':
         action = request.form.get('action', 'login')
@@ -195,6 +225,8 @@ def google_auth_callback():
             db.session.commit()
             flash(f'Welcome to STRATUM, {g_name}!', 'success')
 
+        from flask import session
+        session.clear() # fresh session for new login
         login_user(user, remember=True)
         return redirect(url_for('dashboard'))
 
@@ -248,15 +280,34 @@ def seed_guest_data(user_id):
 
 
 @app.route('/logout')
-@login_required
 def logout():
-    # Delete guest accounts on logout to keep DB clean
-    if current_user.is_guest:
-        user = User.query.get(current_user.id)
-        db.session.delete(user)
-        db.session.commit()
-    logout_user()
-    return redirect(url_for('login'))
+    try:
+        # If authenticated, try to clean up
+        if current_user.is_authenticated:
+            # If guest, clean up their data to keep DB small
+            if getattr(current_user, 'is_guest', False):
+                user_id = current_user.id
+                WaterReading.query.filter_by(user_id=user_id).delete()
+                MitigationLog.query.filter_by(user_id=user_id).delete()
+                user = User.query.get(user_id)
+                if user:
+                    db.session.delete(user)
+                db.session.commit()
+            
+            logout_user()
+    except Exception as e:
+        print(f"Logout error: {e}")
+        db.session.rollback()
+    
+    # Force clear Flask session to remove OAuth tokens/state
+    from flask import session, make_response
+    session.clear()
+    
+    flash('You have been logged out.', 'info')
+    resp = make_response(redirect(url_for('login', force=1)))
+    # Explicitly clear remember-me cookie
+    resp.set_cookie(app.config.get('REMEMBER_COOKIE_NAME', 'remember_token'), '', expires=0)
+    return resp
 
 
 # ── App Routes (all protected) ────────────────────────────────────────────────
@@ -541,8 +592,8 @@ def api_predict(region_name=None):
     if df.empty: return jsonify({'error': 'No data available for your account. Please upload a CSV first.'})
 
     # ── Parameters ────────────────────────────────────────────────────────────
-    # months: 0–60 (0–5 years). 0 means show only historical baseline.
-    months = max(0, min(60, int(request.args.get('months', 12))))
+    # months: 0–120 (0–10 years). 0 means show only historical baseline.
+    months = max(0, min(120, int(request.args.get('months', 12))))
     mitigate_pct     = max(0.0, min(80.0, float(request.args.get('mitigation', 0))))
     mitigation_factor = mitigate_pct / 100.0
 
@@ -568,6 +619,10 @@ def api_predict(region_name=None):
 
     # ── Model 1: Robust Trend (Theil-Sen inspired) ───────────────────────────
     slope, intercept, r_lin, _, _ = linregress(t_vals, y_vals)
+    r2 = r_lin**2
+    
+    # Ensemble weights (placeholder for UI compatibility)
+    w_lin, w_poly, w_dep = 0.85, 0.10, 0.05
     
     # ── Model 2: Physics baseline (Avg Depletion) ────────────────────────────
     if 'depletion_rate' in region_data.columns:
@@ -704,6 +759,51 @@ def api_predict(region_name=None):
             'model_weights':       {k: float(v) for k, v in {'linear': w_lin, 'polynomial': w_poly, 'depletion': w_dep}.items()}
         }
     })
+
+@app.route('/api/ai_analysis', methods=['POST'])
+@login_required
+def api_ai_analysis():
+    """Use Groq to generate deep insights from prediction data."""
+    if not groq_client:
+        return jsonify({'error': 'Groq API Key not configured.'}), 503
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    region = data.get('region')
+    stats = data.get('stats', {})
+    
+    prompt = f"""
+    Analyze the following groundwater data for: {region}
+    - Trend: {stats.get('depletion_velocity')} ft/year
+    - Model Accuracy: {stats.get('r_squared')}
+    - Critical ETA: {stats.get('eta_critical')}
+    - Critical Threshold: {stats.get('critical_threshold')} ft
+    - Mitigation Impact (+{data.get('mitigation')}%): {data.get('gain')} ft recovery
+    
+    Provide a highly structured, professional assessment. 
+    Use the following format:
+    1. **Severity Assessment**: One sentence on current risk.
+    2. **Key Impacts**: 2-3 bullet points on agriculture and ecology.
+    3. **Recommended Action**: One clear, prioritized recommendation.
+    
+    Keep it concise and scannable. Use bold text for emphasis. Max 120 words.
+    """
+
+    try:
+        completion = groq_client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are an expert hydrologist providing data-driven insights."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=250
+        )
+        return jsonify({'insight': completion.choices[0].message.content})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/check_update')
 @login_required

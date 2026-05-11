@@ -193,7 +193,7 @@
 
   <!-- Impact Preview Chart -->
   <div class="col-lg-8">
-    <div class="chart-card mt-0 h-100">
+    <div class="chart-card mt-0 mb-4">
       <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
         <div>
           <span style="font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;color:var(--brand-primary);">Live Impact Preview</span>
@@ -213,6 +213,27 @@
         <p style="font-size:0.85rem;">Select a strategy card above to preview the impact</p>
       </div>
       <canvas id="mitigationChart" height="200" class="d-none"></canvas>
+    </div>
+
+    <!-- Groq AI Strategy Evaluation -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4" id="aiStrategyCard" style="display:none; background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%); border: 1px solid #fed7aa!important;">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="p-2 rounded-3" style="background:#ea580c; color:white;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16h9M16 8V2m0 20v-6M8 8V2m0 20v-6"/>
+            </svg>
+          </div>
+          <h5 class="fw-bold mb-0" style="color:#9a3412;">AI Strategy Evaluation</h5>
+        </div>
+        <div id="aiStrategyLoading" class="text-center py-3">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="text-muted small mt-2">Evaluating strategy viability...</p>
+        </div>
+        <div id="aiStrategyContent" class="text-secondary" style="font-size:0.92rem; line-height:1.6; display:none;">
+          <!-- Evaluation text goes here -->
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -283,9 +304,50 @@ function selectStrategy(el) {
     previewImpact();
 }
 
+function fetchAIStrategyEvaluation(region, strategy, pct, gain) {
+    const card = document.getElementById('aiStrategyCard');
+    const loading = document.getElementById('aiStrategyLoading');
+    const content = document.getElementById('aiStrategyContent');
+
+    card.style.display = 'block';
+    loading.style.display = 'block';
+    content.style.display = 'none';
+
+    fetch('/api/ai_analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            region: region, 
+            stats: { depletion_velocity: 'N/A', r_squared: 'N/A', eta_critical: 'N/A', critical_threshold: 'N/A' },
+            mitigation: pct,
+            gain: gain
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        if (data.insight) {
+            // Simple Markdown to HTML (Bold and Newlines)
+            let formatted = data.insight
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+            content.innerHTML = `<div class="ai-formatted-content"><strong>Assessment of ${strategy}:</strong><br><br>${formatted}</div>`;
+        } else if (data.error) {
+            content.innerHTML = `<p class="text-danger small mb-0">AI Error: ${data.error}</p>`;
+        }
+    })
+    .catch(err => {
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        content.innerHTML = `<p class="text-danger small mb-0">Failed to connect to Groq API.</p>`;
+    });
+}
+
 // ── Chart Preview ─────────────────────────────────────────────────
 function previewImpact() {
     const region = document.getElementById('logRegion').value;
+    const strategy = document.getElementById('logStrategy').value;
     const pct    = parseInt(document.getElementById('logPct').value) || 0;
 
     document.getElementById('previewRegionLabel').textContent = region;
@@ -313,6 +375,13 @@ function previewImpact() {
             const mitigatedData = [...Array(data.historical.labels.length - 1).fill(null)];
             mitigatedData.push(data.historical.data[data.historical.data.length - 1]);
             mitigatedData.push(...data.predicted.mitigated);
+
+            const lastPred = data.predicted.data[data.predicted.data.length - 1];
+            const lastMitigated = data.predicted.mitigated[data.predicted.mitigated.length - 1];
+            const gain = (lastMitigated - lastPred).toFixed(1);
+
+            // Fetch AI Evaluation
+            fetchAIStrategyEvaluation(region, strategy, pct, gain);
 
             const ctx = canvas.getContext('2d');
             if (mitigationChartInstance) mitigationChartInstance.destroy();
